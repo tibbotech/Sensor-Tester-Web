@@ -3,6 +3,7 @@ enum errcheck
 	TBT29_WRONG_MFGID,
 	TBT29_WRONG_DEVID_REVISION,
 	TBT29_NO_SSI_AVAILABLE
+	
 end enum
 
 declare function tbt28_init(use_ssi as no_yes)as ok_ng
@@ -10,3 +11,6 @@ declare function tbt28_get() as word
 declare function tbt29_init(use_ssi as no_yes) as errcheck
 declare function tbt29_get_c() as real
 declare function tbt29_get() as integer
+declare function tbt30_init(use_ssi as no_yes) as ok_ng
+declare function tbt30_get_pc(byref humidity as float, byref temperature as float) as ok_ng
+declare function tbt30_get(byref humidity as word, byref temperature as word) as ok_ng

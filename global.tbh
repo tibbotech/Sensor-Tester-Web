@@ -6,6 +6,8 @@ const CR_LF=chr(10)+chr(13)
 	#define TBT29_DATA_PIN PL_IO_NUM_8_RX0
 	#define TBT28_CLK_PIN PL_IO_NUM_9_TX0
 	#define TBT28_DATA_PIN PL_IO_NUM_8_RX0
+	#define TBT30_CLK_PIN PL_IO_NUM_9_TX0
+	#define TBT30_DATA_PIN PL_IO_NUM_8_RX0
 #ELSE
 	XXXX 'Unsupported platform
 #ENDIF

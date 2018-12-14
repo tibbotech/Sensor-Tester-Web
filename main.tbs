@@ -1,19 +1,28 @@
-include "global.tbh"
+	include "global.tbh"
 
 dim sensor_type as sensortype
 
 '====================================================================
 sub on_sys_init()
 	
-	if tbt28_init(YES)=OK then
-		sys.debugprint("Light Sensor Detected"+CR_LF)
-		sensor_type=LIGHT
-	end if
+		while sensor_type=NONE
+		
+		if tbt28_init(YES)=OK then
+			sys.debugprint("Light Sensor Detected"+CR_LF)
+			sensor_type=LIGHT
+		end if
+		
+		if tbt29_init(YES)=OK then
+			sys.debugprint("Temperature Sensor Detected"+CR_LF)
+			sensor_type=TEMP
+		end if
+		
+		if tbt30_init(YES)=OK then
+			sys.debugprint("Temperature and Humidity Sensor Detected"+CR_LF)
+			sensor_type=TEMP_HUM
+		end if
 	
-	if tbt29_init(YES)=OK then
-		sys.debugprint("Temperature Sensor Detected"+CR_LF)
-		sensor_type=TEMP
-	end if
+	wend
 
 end sub
 
@@ -23,6 +32,11 @@ sub on_sys_timer()
 		sys.debugprint(str(tbt28_get())+CR_LF)
 	else if sensor_type=TEMP then
 		sys.debugprint(ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)+" C"+CR_LF)
+	else if sensor_type=TEMP_HUM then
+		dim t,h as float
+		if tbt30_get_pc(h,t)=OK then
+			sys.debugprint(ftostr(h,FTOSTR_MODE_AUTO,5)+"% "+ftostr(t,FTOSTR_MODE_AUTO,5)+" C"+CR_LF)
+		end if
 	end if
 
 end sub
