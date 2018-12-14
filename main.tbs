@@ -1,0 +1,28 @@
+include "global.tbh"
+
+dim sensor_type as sensortype
+
+'====================================================================
+sub on_sys_init()
+	
+	if tbt28_init(YES)=OK then
+		sys.debugprint("Light Sensor Detected"+CR_LF)
+		sensor_type=LIGHT
+	end if
+	
+	if tbt29_init(YES)=OK then
+		sys.debugprint("Temperature Sensor Detected"+CR_LF)
+		sensor_type=TEMP
+	end if
+
+end sub
+
+sub on_sys_timer()
+	
+	if sensor_type=LIGHT then
+		sys.debugprint(str(tbt28_get())+CR_LF)
+	else if sensor_type=TEMP then
+		sys.debugprint(ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)+" C"+CR_LF)
+	end if
+
+end sub

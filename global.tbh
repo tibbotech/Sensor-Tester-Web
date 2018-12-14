@@ -1,0 +1,25 @@
+'DEFINES-------------------------------------------------------------
+const CR_LF=chr(10)+chr(13)
+
+#IF PLATFORM_ID=TPP2WG2 OR PLATFORM_ID=TPP3WG2 OR PLATFORM_ID=TPP2W OR PLATFORM_ID=TPP3W
+	#define TBT29_CLK_PIN PL_IO_NUM_9_TX0
+	#define TBT29_DATA_PIN PL_IO_NUM_8_RX0
+	#define TBT28_CLK_PIN PL_IO_NUM_9_TX0
+	#define TBT28_DATA_PIN PL_IO_NUM_8_RX0
+#ELSE
+	XXXX 'Unsupported platform
+#ENDIF
+
+enum sensortype
+	NONE,
+	TEMP,
+	TEMP_HUM,
+	LIGHT
+end enum
+
+'INCLUDES------------------------------------------------------------
+include "super_i2c.tbh"
+include "ssi.tbh"
+include "tibbits.tbh"
+
+'DECLARATIONS--------------------------------------------------------
