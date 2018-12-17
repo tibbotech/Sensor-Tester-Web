@@ -1,4 +1,13 @@
-	enum errcheck
+#define TBT_36_RESOLUTION_NOMAL 0	'10-bit mode
+#define TBT_36_RESOLUTION_FULL 	1	'13-bot mode
+#define	TBT_36_RANGE_1P5G	0	
+#define	TBT_36_RANGE_3G		1
+#define	TBT_36_RANGE_6G		2
+#define	TBT_36_RANGE_12G	3
+#define TBT_36_RESOLUTION TBT_36_RESOLUTION_FULL
+#define TBT_36_RANGE TBT_36_RANGE_12G
+
+enum errcheck
 	TBT29_OK,
 	TBT29_WRONG_MFGID,
 	TBT29_WRONG_DEVID_REVISION,
@@ -16,3 +25,7 @@ declare function tbt30_get(byref humidity as word, byref temperature as word) as
 declare function tbt35_init(use_ssi as no_yes) as ok_ng
 declare function tbt35_get() as word
 declare function tbt35_get_kpa()as float
+declare function tbt36_init(use_ssi as no_yes)as ok_ng
+declare sub tbt36_get_mg(byref x_value as integer, byref y_value as integer, byref z_value as integer)
+declare sub tbt36_get(byref x_value as integer, byref y_value as integer, byref z_value as integer)
+

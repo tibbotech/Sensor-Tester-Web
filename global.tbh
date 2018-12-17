@@ -1,28 +1,29 @@
 'DEFINES-------------------------------------------------------------
+#define CLK_PIN PL_IO_NUM_9_TX0
+#define DATA_PIN PL_IO_NUM_8_RX0
+
 const CR_LF=chr(10)+chr(13)
 
-#define TBT28_CLK_PIN PL_IO_NUM_9_TX0
-#define TBT28_DATA_PIN PL_IO_NUM_8_RX0
-#define TBT29_CLK_PIN PL_IO_NUM_9_TX0
-#define TBT29_DATA_PIN PL_IO_NUM_8_RX0
-#define TBT30_CLK_PIN PL_IO_NUM_9_TX0
-#define TBT30_DATA_PIN PL_IO_NUM_8_RX0
-
-
-#define TBT35_CLK_PIN PL_IO_NUM_9_TX0
-#define TBT35_DATA_PIN PL_IO_NUM_8_RX0
-
-enum sensortype
+enum probetype
 	NONE,
 	TEMP,
 	TEMP_HUM,
 	LIGHT,
-	PRESSURE
+	PRESSURE,
+	ACCELEROMETER
 end enum
 
 include "super_i2c.tbh"
 include "ssi.tbh"
 include "tibbits.tbh"
 
-declare sub detect_sensor_type()
-declare sub get_sensor_reading()
+declare sub detect_probe_type()
+declare sub get_probe_reading()
+
+type probe_info
+	probe_type as probetype
+	reading as string
+end type
+
+declare current_probe_info as probe_info
+

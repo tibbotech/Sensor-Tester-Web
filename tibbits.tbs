@@ -16,7 +16,6 @@ const TBT28_CMD_LRESOL_0		=&h13
 
 
 declare sub tbt28_cmd_send(cmd as byte)
-declare sub tbt28_delay_msecond(value as word)
 dim i2c_num_tbt28 as byte
 dim tbt28_init_flag as word
 
@@ -38,7 +37,7 @@ enum tbt29_regs
 end enum
 declare function tbt29_read_data(op as tbt29_regs) as word
 declare sub tbt29_write_data(op as tbt29_regs,data as word)
-declare sub tbt29_delay_msecond(value as word)
+declare sub delay_msecond(value as word)
 dim i2c_num_tbt29 as byte
 dim tbt29_init_flag as word
 
@@ -56,7 +55,6 @@ enum tbt30_status
 end enum
 
 
-declare sub tbt30_delay_msecond(value as word)
 dim i2c_num_tbt30 as byte
 dim tbt30_init_flag as word
 
@@ -71,11 +69,62 @@ const TBT35_CMD_READ_PRESSURE		=&h00
 const TBT35_CMD_READ_COEFFICIENT	=&h04
 const TBT35_CMD_START_CONVERSION	=&h12
 
-declare sub tbt35_delay_msecond(value as word)
-
 dim i2c_num_tbt35 as byte
 dim tbt35_init_flag as word
 dim a0,b1,b2,c12 as float=0
+
+const TBT36_INIT_SIGNATURE=&h1590
+const TBT36_STAMP="TBT36> "
+const TBT36_CR_LF=chr(13)+chr(10)
+
+const TBT36_WRITE_ADDR			=&hA6			' Write Addr
+const TBT36_READ_CODE 			=&hA7			' Read Addr
+
+const TBT36_DEVID				=&hE5
+
+const TBT36_REG_DEVID			=&h00
+const TBT36_REG_THRESH_TAP		=&h1d
+const TBT36_REG_OFS_X			=&h1E
+const TBT36_REG_OFS_Y			=&h1F
+const TBT36_REG_OFS_Z			=&h20
+const TBT36_REG_DUR				=&h21
+const TBT36_REG_LATENT			=&h22
+const TBT36_REG_WINDOW			=&h23
+const TBT36_REG_THRESH_ACT		=&h24
+const TBT36_REG_THRESH_INACT	=&h25
+const TBT36_REG_TIME_INCAT		=&h26
+const TBT36_REG_ACT_INACT_CTL	=&h27
+const TBT36_REG_THRESH_FF		=&h28
+const TBT36_REG_TIME_FF			=&h29
+const TBT36_REG_TAP_AXES		=&h30
+const TBT36_REG_ACT_TAPSTATUS	=&h2B
+const TBT36_REG_BW_RATE			=&h2C
+const TBT36_REG_POWER_CTL		=&h2D
+const TBT36_REG_INT_ENABLE		=&h2E
+const TBT36_REG_INT_MAP			=&h2F
+const TBT36_REG_INT_SOURCE		=&h30
+const TBT36_REG_DATA_FORMAT		=&h31
+const TBT36_REG_DATA_X0			=&h32
+const TBT36_REG_DATA_X1			=&h33
+const TBT36_REG_DATA_Y0			=&h34
+const TBT36_REG_DATA_Y1			=&h35
+const TBT36_REG_DATA_Z0			=&h36
+const TBT36_REG_DATA_Z1			=&h37
+const TBT36_REG_FIFO_CTL		=&h38
+const TBT36_REG_FIFO_STATUS		=&h39
+const TBT36_REG_TA_SIGN			=&h3A
+const TBT36_REG_ORIENT_CONF		=&h3B
+const TBT36_REG_ORIENT			=&h3C
+
+declare sub tbt36_write_reg(cmd as byte, data as byte)
+declare function tbt36_get_reg(cmd as byte) as byte
+declare sub tbt36_delay_msecond(value as word)
+
+
+
+dim format as byte
+dim i2c_num_tbt36 as byte
+dim tbt36_init_flag as word
 
 '====================================================================
 function tbt28_init(use_ssi as no_yes)as ok_ng
@@ -88,7 +137,7 @@ function tbt28_init(use_ssi as no_yes)as ok_ng
 	tbt28_init=OK
 	tbt28_init_flag=TBT28_INIT_SIGNATURE
 
-	i2c_num_tbt28=si2c_register("TBT28", TBT28_DATA_PIN, TBT28_CLK_PIN, use_ssi)
+	i2c_num_tbt28=si2c_register("TBT28", DATA_PIN, CLK_PIN, use_ssi)
 
 	si2c_get(i2c_num_tbt28)
 
@@ -96,9 +145,9 @@ function tbt28_init(use_ssi as no_yes)as ok_ng
 		ssi.channel=i2c_num_tbt28
 		ssi.enabled=NO
 		ssi.baudrate=100
-		ssi.clkmap=TBT28_CLK_PIN
-		ssi.dimap=TBT28_DATA_PIN
-		ssi.domap=TBT28_DATA_PIN
+		ssi.clkmap=CLK_PIN
+		ssi.dimap=DATA_PIN
+		ssi.domap=DATA_PIN
 		ssi.direction=PL_SSI_DIRECTION_LEFT
 		ssi.zmode=PL_SSI_ZMODE_ENABLED_ON_ZERO
 		ssi.mode=PL_SSI_MODE_0
@@ -119,7 +168,7 @@ function tbt28_init(use_ssi as no_yes)as ok_ng
 	tbt28_cmd_send(TBT28_CMD_HRESOL_0)
 
 	'Wait to complete 1st Auto-resolution mode measurement.(max. 180 ms)
-	tbt28_delay_msecond(DELAY_50MS+DELAY_50MS+DELAY_50MS)
+	delay_msecond(DELAY_50MS+DELAY_50MS+DELAY_50MS)
 
 	if tbt28_get()=65535 then
 		tbt28_init=NG
@@ -150,11 +199,6 @@ sub tbt28_cmd_send(cmd as byte)
 	si2c_stop()
 end sub
 
-sub tbt28_delay_msecond(value as word)
-	sys.timercountms=0
-	while sys.timercountms<value
-	wend
-end sub
 
 function tbt29_init(use_ssi as no_yes) as errcheck
 'Call this function to initialize the Tibbit.
@@ -166,15 +210,15 @@ function tbt29_init(use_ssi as no_yes) as errcheck
 
 	tbt29_init=TBT29_OK
 	tbt29_init_flag=TBT29_INIT_SIGNATURE
-	i2c_num_tbt29=si2c_register("TBT29", TBT29_DATA_PIN, TBT29_CLK_PIN,use_ssi)
+	i2c_num_tbt29=si2c_register("TBT29", DATA_PIN, CLK_PIN,use_ssi)
 
 	if i2c_num_tbt29 <4 then
 		ssi.channel=i2c_num_tbt29
 		ssi.enabled=NO
 		ssi.baudrate=100
-		ssi.clkmap=TBT29_CLK_PIN
-		ssi.dimap=TBT29_DATA_PIN
-		ssi.domap=TBT29_DATA_PIN
+		ssi.clkmap=CLK_PIN
+		ssi.dimap=DATA_PIN
+		ssi.domap=DATA_PIN
 		ssi.direction=PL_SSI_DIRECTION_LEFT
 		ssi.mode=PL_SSI_MODE_2
 		ssi.zmode=PL_SSI_ZMODE_ENABLED_ON_ZERO
@@ -223,7 +267,7 @@ function tbt29_get() as integer
 
 	si2c_get(i2c_num_tbt29) 
 
-	tbt29_delay_msecond(DELAY_IN_65_MS)
+	delay_msecond(DELAY_IN_65_MS)
 
 	r=tbt29_read_data(TBT29_REG_TA)
 
@@ -287,13 +331,6 @@ sub tbt29_write_data(op as tbt29_regs,data as word)
 	si2c_stop()
 end sub
 
-sub tbt29_delay_msecond(value as word)
-
-	sys.timercountms=0
-	while sys.timercountms<value
-	wend
-
-end sub
 
 function tbt30_init(use_ssi as no_yes) as ok_ng
 'Call this function to initialize the Tibbit.
@@ -309,7 +346,7 @@ function tbt30_init(use_ssi as no_yes) as ok_ng
 	#endif
 
 	tbt30_init_flag=TBT30_INIT_SIGNATURE
-	i2c_num_tbt30=si2c_register("TBT30", TBT30_DATA_PIN, TBT30_CLK_PIN,use_ssi)
+	i2c_num_tbt30=si2c_register("TBT30", DATA_PIN, CLK_PIN,use_ssi)
 
 	#if TBT30_DEBUG_PRINT=1
 		tbt30_debug_print("i2c num: "+str(i2c_num_tbt30))
@@ -318,9 +355,9 @@ function tbt30_init(use_ssi as no_yes) as ok_ng
 		ssi.channel=i2c_num_tbt30
 		ssi.enabled=NO
 		ssi.baudrate=50
-		ssi.clkmap=TBT30_CLK_PIN
-		ssi.dimap=TBT30_DATA_PIN
-		ssi.domap=TBT30_DATA_PIN
+		ssi.clkmap=CLK_PIN
+		ssi.dimap=DATA_PIN
+		ssi.domap=DATA_PIN
 		ssi.direction=PL_SSI_DIRECTION_LEFT
 		ssi.mode=PL_SSI_MODE_2
 		ssi.zmode=PL_SSI_ZMODE_ENABLED_ON_ZERO
@@ -384,8 +421,7 @@ function tbt30_get(byref humidity as word, byref temperature as word)as ok_ng
 	si2c_start()
 	si2c_write(TBT30_WRITE_ADDR)
 	si2c_stop()
-
-	tbt30_delay_msecond(DELAY_50MS)
+	delay_msecond(DELAY_50MS)
 
 	'fetch humidity data
 	si2c_start()
@@ -444,13 +480,6 @@ function tbt30_get(byref humidity as word, byref temperature as word)as ok_ng
 	
 end function
 
-sub tbt30_delay_msecond(value as word)
-
-	sys.timercountms=0
-	while sys.timercountms<value
-	wend
-
-end sub
 
 function tbt35_init(use_ssi as no_yes) as ok_ng
 'Call this function to initialize the Tibbit.
@@ -464,7 +493,7 @@ function tbt35_init(use_ssi as no_yes) as ok_ng
 	tbt35_init=OK
 
 	tbt35_init_flag=TBT35_INIT_SIGNATURE
-	i2c_num_tbt35=si2c_register("TBT35", TBT35_DATA_PIN, TBT35_CLK_PIN,use_ssi)
+	i2c_num_tbt35=si2c_register("TBT35", DATA_PIN, CLK_PIN,use_ssi)
 
 	#if TBT35_DEBUG_PRINT=1
 		tbt35_debug_print("i2c num: "+str(i2c_num_tbt35))
@@ -474,9 +503,9 @@ function tbt35_init(use_ssi as no_yes) as ok_ng
 		ssi.channel=i2c_num_tbt35
 		ssi.enabled=NO
 		ssi.baudrate=1
-		ssi.clkmap=TBT35_CLK_PIN
-		ssi.dimap=TBT35_DATA_PIN
-		ssi.domap=TBT35_DATA_PIN
+		ssi.clkmap=CLK_PIN
+		ssi.dimap=DATA_PIN
+		ssi.domap=DATA_PIN
 		ssi.direction=PL_SSI_DIRECTION_LEFT
 		ssi.mode=PL_SSI_MODE_2
 		ssi.zmode=PL_SSI_ZMODE_ENABLED_ON_ZERO
@@ -757,8 +786,12 @@ function tbt35_init(use_ssi as no_yes) as ok_ng
 		c12=-c12
 	end if
 	
-	if tbt35_get_kpa()=50 then
+	dim w as word=tbt35_get_kpa()
+	
+	if w=50 or w=436 or w=175 or w=567 or w=566 then
 		tbt35_init=NG
+	else 
+		sys.debugprint("XX")
 	end if
 
 end function
@@ -792,9 +825,9 @@ function tbt35_get_kpa()as float
 
 	'Time between start convert command and data available in the Pressure and Temperature registers
 	#if PLATFORM_TYPE_32
-		tbt35_delay_msecond(1)
+		delay_msecond(1)
 	#else
-		tbt35_delay_msecond(3)
+		delay_msecond(3)
 	#endif
 
 	si2c_start()
@@ -838,11 +871,228 @@ function tbt35_get_kpa()as float
 	#endif	
 end function
 
-sub tbt35_delay_msecond(value as word)
-	dim ax,bx as word
-		sys.timercountms=0
-		while sys.timercountms<value
-		wend
+function tbt36_init(use_ssi as no_yes)as ok_ng
+'Call this function to initialize the Tibbit.
+'Use_ssi argument specifies whether you want to communicate with this Tibbit using the SSI channel running in the I2C mode (YES), or
+'go for direct I/O manipulation a.k.a. bit-banging (NO).
+'Note that there is a limited number of SSI channels so if you set use_ssi=YES this function may return NG, meaning that
+'there are no free SSI channels left. This doesn't mean failure. Rather, it means that comms will proceed in bit banging mood.
+	
+	#if TBT36_DEBUG_PRINT=1
+		adxl_debug_print("++++++++++")
+	#endif
+	tbt36_init=OK
+	tbt36_init_flag=TBT36_INIT_SIGNATURE
+
+	i2c_num_tbt36=si2c_register("TBT36", DATA_PIN, CLK_PIN,use_ssi)
+
+	if i2c_num_tbt36<4 then
+		ssi.channel=i2c_num_tbt36
+		ssi.enabled=NO
+		#IF PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP3WG2
+			ssi.baudrate=15
+		#else if PLATFORM_ID=TPP2W or PLATFORM_ID=TPP3W
+			ssi.baudrate=10
+		#endif
+		ssi.clkmap=CLK_PIN
+		ssi.dimap=DATA_PIN
+		ssi.domap=DATA_PIN
+		ssi.direction=PL_SSI_DIRECTION_LEFT
+		ssi.mode=PL_SSI_MODE_2
+		ssi.zmode=PL_SSI_ZMODE_ENABLED_ON_ZERO
+		ssi.enabled=YES
+	else
+		if use_ssi=YES then
+			tbt36_init=NG
+		end if
+	end if
+
+	si2c_get(i2c_num_tbt36)
+	
+	dim id as byte=&h00
+	
+	id=tbt36_get_reg(TBT36_REG_DEVID)
+
+	if id<>TBT36_DEVID then
+		tbt36_init=NG
+		#if TBT36_DEBUG_PRINT=1
+			adxl_debug_print("DEV ID ERR.")
+		#endif
+		goto leave
+	end if
+
+	format=&h00
+	#if TBT_36_RESOLUTION=TBT_36_RESOLUTION_FULL
+		format=format or &h08
+	#endif
+
+	#if TBT_36_RANGE=TBT_36_RANGE_1P5G
+		format=format or &h00
+	#elif TBT_36_RANGE=TBT_36_RANGE_3G
+		format=format or &h01
+	#elif TBT_36_RANGE=TBT_36_RANGE_6G
+		format=format or &h02
+	#else
+		'when format= 12G mode ,it should be full resolution mode
+		format=format or &h0B
+	#endif
+	'set resolution + range
+	tbt36_write_reg(TBT36_REG_DATA_FORMAT,format)
+	'set measure bit
+	tbt36_write_reg(TBT36_REG_POWER_CTL,&h08)
+	'set as bypass mode
+	tbt36_write_reg(TBT36_REG_FIFO_CTL,&h80)
+leave:
+	
+end function
+
+sub tbt36_get_mg(byref x_value as integer, byref y_value as integer, byref z_value as integer)
+'Returns three signed values expressing acceleration in mG.	
+	dim lx,ly,lz as long
+	
+	tbt36_get(x_value,y_value,z_value)
+	lx=x_value
+	ly=y_value
+	lz=z_value
+	x_value=(lx*2930)/1000
+	y_value=(ly*2930)/1000
+	z_value=(lz*2930)/1000
+end sub
+
+sub tbt36_get(byref x_value as integer, byref y_value as integer, byref z_value as integer)
+'Returns three signed values expressing the acceleration.
+'The scale is -4096 (-12G) to +4095 (+12G).
+'Use tbt36_get_mg() to obtain acceleration in mG units.
+	
+	dim hi_byte,lo_byte as byte
+	'dim x_hi,x_lo,y_hi,y_lo,z_hi,z_lo as byte
+	dim x,y,z as word
+
+	if tbt36_init_flag<>TBT36_INIT_SIGNATURE then 
+		#if TBT36_DEBUG_PRINT=1
+			adxl_debug_print("The lib is not initialized, call tbt36_init() first")
+		#endif
+		exit sub
+	end if
+
+	si2c_get(i2c_num_tbt36)
+	tbt36_write_reg(TBT36_REG_POWER_CTL,&h08)
+
+	'Read X axis value
+	hi_byte=tbt36_get_reg(TBT36_REG_DATA_X1)
+	lo_byte=tbt36_get_reg(TBT36_REG_DATA_X0)
+	x=hi_byte*256+lo_byte
+
+	'Read Y axis value
+	hi_byte=tbt36_get_reg(TBT36_REG_DATA_Y1)
+	lo_byte=tbt36_get_reg(TBT36_REG_DATA_Y0)
+	y=hi_byte*256+lo_byte
+
+	'Read Z axis value
+	hi_byte=tbt36_get_reg(TBT36_REG_DATA_Z1)
+	lo_byte=tbt36_get_reg(TBT36_REG_DATA_Z0)
+	z=hi_byte*256+lo_byte
+
+	dim tmp as byte
+	'In bypass mode, the overrun bit is set when new data replaces unread data in the DATAX, DATAY, and DATAZ registers.
+	tmp=tbt36_get_reg(TBT36_REG_INT_ENABLE)
+	tmp=tmp and &hFE
+	tbt36_write_reg(TBT36_REG_INT_ENABLE,tmp)
+
+	tbt36_write_reg(TBT36_REG_POWER_CTL,&h00)
+	#if TBT36_DEBUG_PRINT=1
+		adxl_debug_print(hex(x)+"/"+hex(y)+"/"+hex(z))
+	#endif
+
+	#if TBT_36_RESOLUTION=TBT_36_RESOLUTION_NOMAL
+		#if TBT_36_RANGE <>TBT_36_RANGE_12G
+			const SIGN_MASK=&hF000
+			const DATA_MASK=&h03FF
+		#else
+			const SIGN_MASK=&hF000
+			const DATA_MASK=&h0FFF
+		#endif
+	#else
+		'This is full resolution mode
+		#if TBT_36_RANGE=TBT_36_RANGE_1P5G
+			const SIGN_MASK=&hF000
+			const DATA_MASK=&h03FF
+		#endif
+
+		#if TBT_36_RANGE=TBT_36_RANGE_3G
+			const SIGN_MASK=&hF000
+			const DATA_MASK=&h07FF
+		#endif
+
+		#if TBT_36_RANGE=TBT_36_RANGE_6G
+			const SIGN_MASK=&hF000
+			const DATA_MASK=&h0FFF
+		#endif
+
+		#if TBT_36_RANGE=TBT_36_RANGE_12G
+			const SIGN_MASK=&hE000
+			const DATA_MASK=&h1FFF
+		#endif
+	#endif
+
+	if x and SIGN_MASK then
+		x= x and DATA_MASK
+		x_value=DATA_MASK-x
+		x_value=(-x_value)
+	else
+		x_value=x and DATA_MASK
+	end if
+
+	if y and SIGN_MASK then
+		y= y and DATA_MASK
+		y_value=DATA_MASK-y
+		y_value=(-y_value)
+	else
+		y_value= y and DATA_MASK
+	end if
+
+	if z and SIGN_MASK then
+		z= z and DATA_MASK
+		z_value=DATA_MASK-z
+		z_value=(-z_value)
+	else
+		z_value=z and DATA_MASK
+	end if
+end sub
+
+sub tbt36_write_reg(cmd as byte, data as byte)
+	si2c_start()
+
+	si2c_write(TBT36_WRITE_ADDR)
+
+	si2c_write(cmd)
+	si2c_write(data)
+
+	si2c_stop()	
+end sub
+
+function tbt36_get_reg(cmd as byte) as byte
+	dim tmp as byte
+	si2c_start()
+
+	si2c_write(TBT36_WRITE_ADDR)
+	si2c_write(cmd)
+
+	si2c_start()
+
+	si2c_write(TBT36_READ_CODE)
+	tmp=si2c_read(false)
+
+	si2c_stop()
+
+	tbt36_get_reg=tmp
+end function
+
+
+sub delay_msecond(value as word)
+	sys.timercountms=0
+	while sys.timercountms<value
+	wend
 end sub
 
 

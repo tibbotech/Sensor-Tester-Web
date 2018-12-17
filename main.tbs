@@ -1,62 +1,77 @@
 include "global.tbh"
 
-dim sensor_type as sensortype
+dim current_probe_info as probe_info
 
 '====================================================================
 sub on_sys_init()
 	
-	detect_sensor_type()
+	
+	detect_probe_type()
 
 end sub
 
 sub on_sys_timer()
 	
-	get_sensor_reading()
+	get_probe_reading()
 	
 end sub
 
-sub detect_sensor_type()
+sub detect_probe_type()
 	
-	while sensor_type=NONE
-		
+	while current_probe_info.probe_type=NONE
 		if tbt28_init(YES)=OK then
 			sys.debugprint("Light Sensor Detected"+CR_LF)
-			sensor_type=LIGHT
+			current_probe_info.probe_type=LIGHT
 		end if
 		
 		if tbt29_init(YES)=OK then
 			sys.debugprint("Temperature Sensor Detected"+CR_LF)
-			sensor_type=TEMP
+			current_probe_info.probe_type=TEMP
 		end if
 		
 		if tbt30_init(YES)=OK then
 			sys.debugprint("Temperature and Humidity Sensor Detected"+CR_LF)
-			sensor_type=TEMP_HUM
+			current_probe_info.probe_type=TEMP_HUM
 		end if
 		
 		if tbt35_init(YES)=OK then
 			sys.debugprint("Pressure Sensor Detected"+CR_LF)
-			sensor_type=PRESSURE
+			current_probe_info.probe_type=PRESSURE
 		end if
-	
+		
+		if tbt36_init(NO)=OK then
+			sys.debugprint("Accelerometer Detected"+CR_LF)
+			current_probe_info.probe_type=ACCELEROMETER
+		end if
 	wend
 
 end sub
 
-sub get_sensor_reading()
+sub get_probe_reading()
 	
-	if sensor_type=LIGHT then
-		sys.debugprint(str(tbt28_get())+CR_LF)
-	else if sensor_type=TEMP then
-		sys.debugprint(ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)+" C"+CR_LF)
-	else if sensor_type=TEMP_HUM then
-		dim t,h as float
-		if tbt30_get_pc(h,t)=OK then
-			sys.debugprint(ftostr(h,FTOSTR_MODE_AUTO,5)+"% "+ftostr(t,FTOSTR_MODE_AUTO,5)+" C"+CR_LF)
-		end if
-	else if sensor_type=PRESSURE then
-		sys.debugprint(ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)+" kPa"+CR_LF)
-	end if
-
+	select case current_probe_info.probe_type
+		case LIGHT:
+			current_probe_info.reading=str(tbt28_get())
+			sys.debugprint(str(tbt28_get())+CR_LF)
+		case TEMP: 'comparison with a non-constant expression
+			current_probe_info.reading=ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)+" C"
+			sys.debugprint(ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)+" C"+CR_LF)
+		case TEMP_HUM: 'comparison with a non-constant expression
+			dim t,h as float
+			if tbt30_get_pc(h,t)=OK then
+				current_probe_info.reading=ftostr(h,FTOSTR_MODE_AUTO,5)+"% "+ftostr(t,FTOSTR_MODE_AUTO,5)+" C"
+				sys.debugprint(ftostr(h,FTOSTR_MODE_AUTO,5)+"% "+ftostr(t,FTOSTR_MODE_AUTO,5)+" C"+CR_LF)
+			end if
+		case PRESSURE: 'comparison with a non-constant expression
+			current_probe_info.reading=ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)+" kPa"
+			sys.debugprint(ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)+" kPa"+CR_LF)
+		case ACCELEROMETER: 'comparison with a non-constant expression
+			dim x,y,z as integer
+			tbt36_get_mg(x,y,z)
+			current_probe_info.reading="X="+stri(x)+" Y="+stri(y)+" Z="+stri(z)
+			sys.debugprint("X="+stri(x)+" Y="+stri(y)+" Z="+stri(z)+CR_LF)
+		case else:
+	end select
+	
 end sub
 
