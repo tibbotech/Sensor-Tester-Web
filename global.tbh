@@ -21,6 +21,8 @@ include "tibbits.tbh"
 declare sub detect_probe_type()
 declare sub get_probe_reading()
 
+declare function parse_two_decimal_places(s as string) as string
+
 type probe_info
 	probe_type as probetype
 	reading as string

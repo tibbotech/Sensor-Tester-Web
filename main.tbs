@@ -39,14 +39,17 @@ sub detect_probe_type()
 		
 		if tbt30_init(YES)=OK then
 			current_probe_info.probe_type=TEMP_HUM
+			temp_hum_screen()
 		end if
 		
 		if tbt35_init(YES)=OK then
 			current_probe_info.probe_type=PRESSURE
+			pressure_screen()
 		end if
 		
 		if tbt36_init(NO)=OK then
 			current_probe_info.probe_type=ACCELEROMETER
+			accelerometer_screen()
 		end if
 		
 	wend
@@ -55,37 +58,48 @@ end sub
 
 sub get_probe_reading()
 	
+	dim s as string
 	select case current_probe_info.probe_type
 	
 	case LIGHT:
-			current_probe_info.reading=str(tbt28_get())
+			current_probe_info.reading=str(tbt28_get())+" lux"
 			if tbt28_get()=65535 then
 				current_probe_info.probe_type=NONE
 			end if
 			update_light_reading()
 	
 	case TEMP: 
-			current_probe_info.reading=ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)+" C"
+			s=ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)
+			s=parse_two_decimal_places(s)+"C"
+			current_probe_info.reading=s			
 			if tbt29_read_data(TBT29_REG_MFGID)<>TBT29_MFG_ID then
 				current_probe_info.probe_type=NONE
 			end if
 			update_temp_reading()
 		
 	case TEMP_HUM: 
-	
 		dim t,h as float
+		dim temp, hum as string
 		if tbt30_get_pc(h,t)=OK then
-			current_probe_info.reading=ftostr(h,FTOSTR_MODE_AUTO,5)+"% "+ftostr(t,FTOSTR_MODE_AUTO,5)+" C"
+			hum=ftostr(h,FTOSTR_MODE_AUTO,5)
+			hum=parse_two_decimal_places(hum)+"%"
+			temp=ftostr(t,FTOSTR_MODE_AUTO,5)
+			temp=parse_two_decimal_places(temp)+"C "
+			current_probe_info.reading=temp+hum
 		else
 			current_probe_info.probe_type=NONE
 		end if
+		update_temp_hum_reading()
 		
 	case PRESSURE: 
-		current_probe_info.reading=ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)+" kPa"
+		s=ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)
+		s=parse_two_decimal_places(s)+" kPa"
+		current_probe_info.reading=s
 		dim w as word=tbt35_get_kpa()
 		if w=50 or w=436 or w=175 or w=567 or w=566 or w=18 then
 			current_probe_info.probe_type=NONE
 		end if
+		update_pressure_reading()
 
 	case ACCELEROMETER: 
 		dim x,y,z as integer
@@ -94,9 +108,25 @@ sub get_probe_reading()
 		if x=0 and y=0 and z=0 then
 			current_probe_info.probe_type=NONE
 		end if
+		update_accelerometer_reading()
 
 	end select
 	
 	'probe_reading_screen()
 	
 end sub
+
+function parse_two_decimal_places(s as string) as string
+	dim b as byte
+	b=instr(1,s,".",1)
+	if b=0 then
+		s=s+".00"
+	else if len(s)-b=1 then
+		s=s+"0"
+	else if len(s)-b=3 then
+		s=left(s,len(s)-1)
+	end if
+	
+	parse_two_decimal_places=s
+
+end function

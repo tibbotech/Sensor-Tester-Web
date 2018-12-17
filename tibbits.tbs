@@ -782,7 +782,7 @@ function tbt35_init(use_ssi as no_yes) as ok_ng
 	
 	dim w as word=tbt35_get_kpa()
 	
-	if w=50 or w=436 or w=175 or w=567 or w=566 then
+	if w=50 or w=436 or w=175 or w=179 or w=567 or w=566 then
 		tbt35_init=NG
 	else 
 		sys.debugprint("XX")
