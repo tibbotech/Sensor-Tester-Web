@@ -1,11 +1,23 @@
-	include "global.tbh"
+include "global.tbh"
 
 dim sensor_type as sensortype
 
 '====================================================================
 sub on_sys_init()
 	
-		while sensor_type=NONE
+	detect_sensor_type()
+
+end sub
+
+sub on_sys_timer()
+	
+	get_sensor_reading()
+	
+end sub
+
+sub detect_sensor_type()
+	
+	while sensor_type=NONE
 		
 		if tbt28_init(YES)=OK then
 			sys.debugprint("Light Sensor Detected"+CR_LF)
@@ -21,12 +33,17 @@ sub on_sys_init()
 			sys.debugprint("Temperature and Humidity Sensor Detected"+CR_LF)
 			sensor_type=TEMP_HUM
 		end if
+		
+		if tbt35_init(YES)=OK then
+			sys.debugprint("Pressure Sensor Detected"+CR_LF)
+			sensor_type=PRESSURE
+		end if
 	
 	wend
 
 end sub
 
-sub on_sys_timer()
+sub get_sensor_reading()
 	
 	if sensor_type=LIGHT then
 		sys.debugprint(str(tbt28_get())+CR_LF)
@@ -37,6 +54,9 @@ sub on_sys_timer()
 		if tbt30_get_pc(h,t)=OK then
 			sys.debugprint(ftostr(h,FTOSTR_MODE_AUTO,5)+"% "+ftostr(t,FTOSTR_MODE_AUTO,5)+" C"+CR_LF)
 		end if
+	else if sensor_type=PRESSURE then
+		sys.debugprint(ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)+" kPa"+CR_LF)
 	end if
 
 end sub
+
