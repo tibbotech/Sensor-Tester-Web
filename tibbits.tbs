@@ -22,20 +22,14 @@ dim tbt28_init_flag as word
 const TBT29_INIT_SIGNATURE=&hF083
 const TBT29_STAMP="TBT29> "
 const TBT29_CR_LF=chr(13)+chr(10)
-const TBT29_MFG_ID	=&h54
+
 const TBT29_DEVID		=&h400
 const TBT29_WRITE_ADDR=&h30
 const TBT29_READ_ADDR=&h31
 enum tbt29_resolution
 	TBT29_RESOLUSION_MODE_1=&h01  '0.25C (tCONV = 65 ms typical)
 end enum
-enum tbt29_regs
-	TBT29_REG_TA=&h05,
-	TBT29_REG_MFGID=&h06,
-	TBT29_REG_IDREV=&h07,
-	TBT29_REG_RESOL=&h08
-end enum
-declare function tbt29_read_data(op as tbt29_regs) as word
+
 declare sub tbt29_write_data(op as tbt29_regs,data as word)
 declare sub delay_msecond(value as word)
 dim i2c_num_tbt29 as byte
@@ -866,9 +860,6 @@ function tbt35_get_kpa()as float
 	'kpa=pcomp*(115-50)/1023 +50
 	tbt35_get_kpa=pcomp*(115-50)/1023+50
 
-	#if TBT35_DEBUG_PRINT=1
-		tbt35_debug_print("padc/tadc"+str(padc)+"/"+str(tadc))
-	#endif	
 end function
 
 function tbt36_init(use_ssi as no_yes)as ok_ng

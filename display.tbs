@@ -1,0 +1,172 @@
+include "global.tbh"
+include "display.tbh"
+
+'Initializes LCD screen
+
+sub lcd_init()
+	lcd.width=320
+	lcd.height=240
+	io.num=PL_IO_NUM_55
+	io.enabled=YES
+	io.num=PL_IO_NUM_43
+	io.enabled=YES
+	io.num=PL_IO_NUM_42
+	io.enabled=YES
+	io.num=PL_IO_NUM_41
+	io.enabled=YES
+	io.num=PL_IO_NUM_40
+	io.enabled=YES
+	lcd.iomapping="55,43,42,41,40,0" 
+	lcd.rotated=YES 
+	lcd.enabled=YES
+	io.num=PL_IO_NUM_54 
+	io.enabled=YES
+	io.state=LOW
+	io.num=PL_IO_NUM_44
+	io.enabled=YES
+	io.state=LOW
+	kp.returnlinesmapping="36,37,38,39"
+	kp.enabled=YES
+	beep.divider=0
+	io.num=46
+	io.enabled=YES
+	io.num=47
+	io.enabled=YES
+	io.num=48
+	io.enabled=YES
+	pat.play(PAT_GREEN_ON,PL_PAT_CANINT)
+	set_LED(&b00000)
+	beep.divider=21600
+	beep.play("BB",PL_BEEP_CANINT)
+	pat.play(PAT_THREE_SHORT_BOTH,PL_PAT_CANINT)
+	sys.timercountms=0
+	while sys.timercountms<2000
+	wend
+	pat.play(PAT_TWO_SHORT_GREEN,PL_PAT_CANINT)
+end sub
+
+sub set_LED(pattern as byte)
+
+	dim f,x as byte
+	dim s as string(8)
+	
+	s=mid(bin(pattern),3,8)
+	s=strgen(8-len(s),"0")+s	
+	
+	'make 5 clocks
+	io.num=PL_IO_NUM_47
+	for f=0 to 4
+		x=1-val(mid(s,f+4,1))
+		io.lineset(PL_IO_NUM_48,x)
+		io.state=LOW
+		io.state=HIGH
+	next f
+	
+end sub
+
+sub no_probe_detected_screen()
+	lcd.lock
+	lcd.forecolor=0
+	lcd.fill(0,0,lcd.width,lcd.height)
+	lcd.backcolor=0
+	lcd.forecolor=65535 
+	romfile.open("11x19(HP).bin")
+	lcd.setfont(romfile.offset)
+	lcd.print("No probe detected!",75,70)	
+	lcd.print("Please ensure probe",65,120)	
+	lcd.print("is connected properly!",55,140)	
+	lcd.unlock
+end sub
+
+sub probe_reading_screen()
+	
+	lcd.lock
+	lcd.forecolor=0
+	lcd.fill(0,0,lcd.width,lcd.height)
+	lcd.backcolor=0
+	lcd.forecolor=65535 
+	romfile.open("11x19(HP).bin")
+	lcd.setfont(romfile.offset)
+	lcd.print(current_probe_info.reading,150,12)	
+	lcd.unlock
+	
+end sub
+
+sub light_screen()
+
+	lcd.lock
+	lcd.forecolor=0
+	lcd.fill(0,0,lcd.width,lcd.height)
+	lcd.backcolor=0
+	lcd.forecolor=65535 
+	romfile.open("11x19(HP).bin")
+	lcd.setfont(romfile.offset)
+	lcd.print("Ambient Light Sensor",70,20)	
+	lcd.print("Tibbit 28",130,50)	
+	lcd.print("OR",160,70)	
+	lcd.print("CP#03",145,90)	
+	romfile.open("15x21(HP).bin")	
+	lcd.setfont(romfile.offset)	
+	lcd.print("lux",157,190)	
+	lcd.unlock
+
+end sub
+
+sub update_light_reading()
+	
+	lcd.forecolor=0
+	lcd.fill(70,160,200,30)
+	romfile.open("digits-24x16(V).BIN")	
+	lcd.setfont(romfile.offset)	
+	lcd.forecolor=1631 
+	if len(current_probe_info.reading)=1 then
+		lcd.print(current_probe_info.reading,160,160)
+	else if len(current_probe_info.reading)=2 then
+		lcd.print(current_probe_info.reading,153,160)
+	else if len(current_probe_info.reading)=3 then
+		lcd.print(current_probe_info.reading,145,160)
+	else if len(current_probe_info.reading)=4 then
+		lcd.print(current_probe_info.reading,138,160)
+	end if
+	
+end sub
+
+sub temp_screen()
+
+	lcd.lock
+	lcd.forecolor=0
+	lcd.fill(0,0,lcd.width,lcd.height)
+	lcd.backcolor=0
+	lcd.forecolor=65535 
+	romfile.open("11x19(HP).bin")
+	lcd.setfont(romfile.offset)
+	lcd.print("Ambient Temperature Meter",55,20)	
+	lcd.print("Tibbit 29",130,50)	
+	lcd.print("OR",160,70)	
+	lcd.print("CP#01",145,90)	
+	romfile.open("15x21(HP).bin")	
+	lcd.setfont(romfile.offset)	
+	lcd.print("C",160,190)	
+	lcd.unlock
+
+end sub
+
+sub update_temp_reading()
+	
+	lcd.forecolor=0
+	lcd.fill(70,160,200,30)
+	lcd.forecolor=1631 
+	romfile.open("DIGI48.bin")
+	lcd.setfont(romfile.offset)
+	lcd.print("22.5%",160,160)
+'	if len(current_probe_info.reading)=1 then
+'		lcd.print(current_probe_info.reading,160,160)
+'	else if len(current_probe_info.reading)=2 then
+'		lcd.print(current_probe_info.reading,153,160)
+'	else if len(current_probe_info.reading)=3 then
+'		lcd.print(current_probe_info.reading,145,160)
+'	else if len(current_probe_info.reading)=4 then
+'		lcd.print(current_probe_info.reading,138,160)
+'	end if
+	
+end sub
