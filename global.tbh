@@ -12,12 +12,12 @@ const PAT_GREEN_ON=					"G~"
 const PAT_LONG_RED=					"RRRRRRRR-~"
 
 enum probetype
+	NONE,
 	TEMP,
 	TEMP_HUM,
 	LIGHT,
-	PRESSURE,
 	ACCELEROMETER,
-	NONE
+	PRESSURE
 end enum
 
 include "sock\trunk\sock.tbh"

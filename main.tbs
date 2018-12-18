@@ -34,28 +34,28 @@ sub on_sock_data_arrival()
 end sub
 
 sub detect_probe_type()
-	
 
-		detect_probe_leds()		
-		if tbt28_init(YES)=OK then
-			current_probe_info.probe_type=LIGHT
-		end if
-		
-		if tbt29_init(YES)=OK then
-			current_probe_info.probe_type=TEMP
-		end if
-		
-		if tbt30_init(YES)=OK then
-			current_probe_info.probe_type=TEMP_HUM
-		end if
-		
-		if tbt35_init(YES)=OK then
-			current_probe_info.probe_type=PRESSURE
-		end if
-		
-		if tbt36_init(NO)=OK then
-			current_probe_info.probe_type=ACCELEROMETER
-		end if
+
+	detect_probe_leds()		
+	if tbt28_init(YES)=OK then
+		current_probe_info.probe_type=LIGHT
+	end if
+	
+	if tbt29_init(YES)=OK then
+		current_probe_info.probe_type=TEMP
+	end if
+	
+	if tbt30_init(YES)=OK then
+		current_probe_info.probe_type=TEMP_HUM
+	end if
+	
+	if tbt35_init(YES)=OK then
+		current_probe_info.probe_type=PRESSURE
+	end if
+	
+	if tbt36_init(NO)=OK then
+		current_probe_info.probe_type=ACCELEROMETER
+	end if
 
 	
 end sub

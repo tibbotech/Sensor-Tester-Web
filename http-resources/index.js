@@ -23,16 +23,21 @@ class MainMenu extends React.Component {
   constructor() {
     super();
     $.ajaxSetup({ cache: false });
-    this.state = { probe: null }
+    this.state = { probe: null, reading: "" }
+    this.updateJSON();
+  }
+
+  updateJSON() {
+    var sensorTypes = ["Unknown", "BP#01 - Ambient Temperature sensor", "BP#02 - Ambient Temperature & Humidity Sensor", "BP#03 - Ambient Light sensor", "BP#04 - 3-Axis Accelerometer", "Pressure Sensor"]
     this.interval = setInterval(() => {
       $.getJSON("json.html?date=" + new Date(), (data) => {
-          this.setState({ probe: probe })
+        this.setState({ probe: sensorTypes[data.probe], reading: data.reading })
       })
     }, 500);
   }
+
   render() {
-    if (this.state.probe === false) {
-      clearInterval(this.interval);
+    if (this.state.probe === 0) {
       return (
         <div>
           <div>
@@ -42,20 +47,18 @@ class MainMenu extends React.Component {
         </div>
       )
     }
-    else  {
+   else {
       return (
         <div>
           <div>
-            <h1>Probes Detect!</h1> <br></br> <br></br>
-            <h2 class="center">Reading!<br></br><br></br><br></br></h2>
+            <h1>{this.state.probe}</h1> <br></br> <br></br>
+            <h2 class="center">Reading : {this.state.reading} <br></br><br></br><br></br></h2>
           </div>
         </div>
       )
     }
-    
-      
-    }
   }
+}
 
 class SetUp extends React.Component {
 
@@ -293,12 +296,12 @@ class Upload extends React.Component {
           <div>
             <h1>Upload Successful</h1> <br></br>
             {
-              (this.props.uploadtype) == "firmware" ? 
-              (
-                <h2>
+              (this.props.uploadtype) == "firmware" ?
+                (
+                  <h2>
                     You can now power-cycle the Probe.<br></br><br></br>
                   </h2>
-              ) :
+                ) :
                 (
                   <h2>
                     Power-cycle the Probe to execute the Monitor updater.<br></br>

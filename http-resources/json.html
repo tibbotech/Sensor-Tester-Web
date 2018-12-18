@@ -1,30 +1,9 @@
 <? 
-'include "http.tbh"
+include "global.tbh"
 dim b as byte
-dim total_sensors as byte
-'if current_sensor_state.total_sensors_detected=0 then
-	total_sensors=0
-else
-	total_sensors=current_sensor_state.total_sensors_detected - 1
-end if
 ?>
 {
-"sensors":<?sock.setdata(str(current_sensor_state.total_sensors_detected))?>,
-"percentage":<?sock.setdata(str(current_upload_state.percentage))?>,
-"uploadsuccessful":<?sock.setdata(str(current_upload_state.upload_successful))?>,
-"id":[<?for b=0 to (total_sensors)
-	?>"<?sock.setdata(str(current_sensor_data.sens_no(b)))?>"<?if b<>total_sensors then?>,<?end if
-	next b?>],
-"type":[<?for b=0 to (total_sensors)
-	?>"<?sock.setdata(str(current_sensor_data.sens_type(b)))?>"<?if b<>total_sensors then?>,<?end if
-	next b?>],
-"data":[<?for b=0 to (total_sensors)
-	?>"<?sock.setdata(current_sensor_data.sens_data_parsed(b))?>"<?if b<>total_sensors then?>,<?end if
-	next b?>],
-"monitor":[<?for b=0 to (total_sensors)
-	?>"<?sock.setdata(current_sensor_data.mon_ver(b))?>"<?if b<>total_sensors then?>,<?end if
-	next b?>],
-"firmware":[<?for b=0 to (total_sensors)
-	?>"<?sock.setdata(current_sensor_data.firm_ver(b))?>"<?if b<>total_sensors then?>,<?end if
-	next b?>]
+"probe":"<?sock.setdata(str(current_probe_info.probe_type))?>",
+"reading":"<?sock.setdata(str(current_probe_info.reading))?>",
+"test":"test"
 }
