@@ -1,0 +1,137 @@
+h1 {
+  color: black;
+  font-size: xx-large;
+  text-align: center
+}
+
+h2 {
+  color: black;
+  font-size:x-large;
+  text-align: center  
+}
+
+h3 {
+  color: black;
+  font-size: medium;
+  text-align: center
+}
+
+red {
+  color: red;
+	font-weight: bold;	
+	font-size: x-large
+}
+
+green {
+  color: LimeGreen;
+	font-weight: bold;
+	font-size: x-large
+}
+
+.btn-link{
+  border:none;
+  border-radius:12px;
+  outline:none;
+  background:none;
+  cursor:pointer;
+  color:#0000EE;
+  padding:0;
+  text-decoration:underline;
+  font-family:inherit;
+  font-size:inherit;
+}
+
+.progress{
+  width:40%;
+  text-align: center;
+ 
+}
+
+.logo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.button {
+  background-color: #F36F30;
+  border: none;
+  border-radius:12px;
+  color: white;
+  padding: 16px 32px;
+  text-align: center;
+  font-size: large;
+  margin: 4px 2px;
+  opacity: 0.6;
+  transition: 0.3s;
+	display:block; 
+  text-decoration: none;
+  cursor: pointer;
+  width: 80%;
+  height: 90%;
+}
+
+.button:hover {opacity: 1}
+
+
+.smallbutton {
+  background-color: #F36F30;
+  border: none;
+  border-radius:12px;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  font-size: large;
+  margin: 4px 2px;
+  opacity: 0.6;
+  transition: 0.3s;
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+  width: 20%;
+  height: 90%;
+}
+
+.Link {
+  text-decoration: none;
+}
+
+.smallbutton:hover {opacity: 1}
+
+.center {
+  text-align: center;
+  list-style-position: inside;
+}
+
+.textbox {
+  width: 40%;
+}
+
+.numbox {
+  width: 10%;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 70%;
+}
+
+td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+  color: white;
+  background-color:#F36F30;
+}
+
+.readingstable {
+  border: 1px solid black;
+  width: 100px;
+}

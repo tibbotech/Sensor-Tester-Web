@@ -3,49 +3,7 @@ include "display.tbh"
 
 'Initializes LCD screen
 
-sub lcd_init()
-	lcd.width=320
-	lcd.height=240
-	io.num=PL_IO_NUM_55
-	io.enabled=YES
-	io.num=PL_IO_NUM_43
-	io.enabled=YES
-	io.num=PL_IO_NUM_42
-	io.enabled=YES
-	io.num=PL_IO_NUM_41
-	io.enabled=YES
-	io.num=PL_IO_NUM_40
-	io.enabled=YES
-	lcd.iomapping="55,43,42,41,40,0" 
-	lcd.rotated=YES 
-	lcd.enabled=YES
-	io.num=PL_IO_NUM_54 
-	io.enabled=YES
-	io.state=LOW
-	io.num=PL_IO_NUM_44
-	io.enabled=YES
-	io.state=LOW
-	kp.returnlinesmapping="36,37,38,39"
-	kp.enabled=YES
-	beep.divider=0
-	io.num=46
-	io.enabled=YES
-	io.num=47
-	io.enabled=YES
-	io.num=48
-	io.enabled=YES
-	set_LED(&b00000)
-	beep.divider=21600
-	beep.play("BB",PL_BEEP_CANINT)
-	pat.play(PAT_THREE_SHORT_BOTH,PL_PAT_CANINT)
-	clear_screen()
-	romfile.open("11x19(HP).bin")
-	lcd.setfont(romfile.offset)
-	sys.timercountms=0
-	while sys.timercountms<2000
-	wend
-	pat.play(PAT_TWO_SHORT_GREEN,PL_PAT_CANINT)
-end sub
+
 
 sub clear_screen()
 

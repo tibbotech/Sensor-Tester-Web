@@ -1,5 +1,4 @@
 include "global.tbh"
-include "display.tbh"
 
 dim current_probe_info as probe_info
 dim led_probe_timer, led_detect_timer as byte
@@ -8,53 +7,56 @@ dim pattern_timer as dword = sys.timercount32
 '====================================================================
 sub on_sys_init()
 	
-	lcd_init()
+	init_sockets()
+	init_LEDS()
+	dhcp_start(PL_SOCK_INTERFACE_NET,"","")	
 
 end sub
 
 sub on_sys_timer()
 	
+	dhcp_proc_timer()
+
 	select case current_probe_info.probe_type
 		case NONE:
 			detect_probe_type()
 		case else:
 			get_probe_reading()
 	end select
-		
+
+			
+end sub
+
+sub on_sock_data_arrival()
+
+	dhcp_proc_data()
+
 end sub
 
 sub detect_probe_type()
-		
-	no_probe_detected_screen()
 	
-	while current_probe_info.probe_type=NONE
+
 		detect_probe_leds()		
 		if tbt28_init(YES)=OK then
 			current_probe_info.probe_type=LIGHT
-			light_screen()
 		end if
 		
 		if tbt29_init(YES)=OK then
 			current_probe_info.probe_type=TEMP
-			temp_screen()
 		end if
 		
 		if tbt30_init(YES)=OK then
 			current_probe_info.probe_type=TEMP_HUM
-			temp_hum_screen()
 		end if
 		
 		if tbt35_init(YES)=OK then
 			current_probe_info.probe_type=PRESSURE
-			pressure_screen()
 		end if
 		
 		if tbt36_init(NO)=OK then
 			current_probe_info.probe_type=ACCELEROMETER
-			accelerometer_screen()
 		end if
-		
-	wend
+
 	
 end sub
 
@@ -70,7 +72,6 @@ sub get_probe_reading()
 			if tbt28_get()=65535 then
 				current_probe_info.probe_type=NONE
 			end if
-			update_light_reading()
 	
 	case TEMP: 
 			s=ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)
@@ -79,7 +80,6 @@ sub get_probe_reading()
 			if tbt29_read_data(TBT29_REG_MFGID)<>TBT29_MFG_ID then
 				current_probe_info.probe_type=NONE
 			end if
-			update_temp_reading()
 		
 	case TEMP_HUM: 
 		dim t,h as float
@@ -93,7 +93,6 @@ sub get_probe_reading()
 		else
 			current_probe_info.probe_type=NONE
 		end if
-		update_temp_hum_reading()
 		
 	case PRESSURE: 
 		s=ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)
@@ -103,7 +102,6 @@ sub get_probe_reading()
 		if w=50 or w=436 or w=175 or w=567 or w=566 or w=18 then
 			current_probe_info.probe_type=NONE
 		end if
-		update_pressure_reading()
 
 	case ACCELEROMETER: 
 		dim x,y,z as integer
@@ -112,7 +110,6 @@ sub get_probe_reading()
 		if x=0 and y=0 and z=0 then
 			current_probe_info.probe_type=NONE
 		end if
-		update_accelerometer_reading()
 
 	end select
 	
@@ -133,6 +130,44 @@ function parse_two_decimal_places(s as string) as string
 
 end function
 
+sub init_LEDS()
+	
+	beep.divider=0
+	io.num=46
+	io.enabled=YES
+	io.num=47
+	io.enabled=YES
+	io.num=48
+	io.enabled=YES
+	set_LED(&b00000)
+	beep.divider=21600
+	beep.play("BB",PL_BEEP_CANINT)
+	pat.play(PAT_THREE_SHORT_BOTH,PL_PAT_CANINT)
+	sys.timercountms=0
+	while sys.timercountms<2000
+	wend
+	pat.play(PAT_ONE_SHORT_GREEN,PL_PAT_CANINT)
+end sub
+
+sub set_LED(pattern as byte)
+
+	dim f,x as byte
+	dim s as string(8)
+	
+	s=mid(bin(pattern),3,8)
+	s=strgen(8-len(s),"0")+s	
+	
+	'make 5 clocks
+	io.num=PL_IO_NUM_47
+	for f=0 to 4
+		x=1-val(mid(s,f+4,1))
+		io.lineset(PL_IO_NUM_48,x)
+		io.state=LOW
+		io.state=HIGH
+	next f
+	
+end sub
+
 sub polling_probe_leds()
 	
 	pat.play(PAT_GREEN_ON,PL_PAT_CANINT)
@@ -147,8 +182,7 @@ sub polling_probe_leds()
 end sub
 
 sub detect_probe_leds()
-	
-	
+		
 	pat.play(PAT_GREEN_ON,PL_PAT_CANINT)
 	if sys.timercount32-pattern_timer>=1 then
 		if led_detect_timer<4 then
@@ -172,5 +206,62 @@ sub detect_probe_leds()
 		set_LED(&b10000)
 	end select	
 	
-
 end sub 
+
+sub init_sockets()
+	dim f as byte
+	for f=8 to 15
+		sock.num=f
+		sock.txbuffrq(4)
+		sock.varbuffrq(4)
+		sock.redir(PL_REDIR_SOCK0 + sock.num)
+		sock.protocol=PL_SOCK_PROTOCOL_TCP
+		sock.inconmode=PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
+		sock.allowedinterfaces="NET,WLN"
+		sock.httpportlist="80,90"
+	next f
+	sys.buffalloc()
+end sub
+
+sub callback_dhcp_ok(renew as no_yes, interface as pl_sock_interfaces, byref ip as string, byref gateway_ip as string, byref netmask as string, lease_time as dword)
+	if interface=PL_SOCK_INTERFACE_NET then
+		if renew=YES and net.ip<>ip then
+			sys.reboot
+		end if
+		if net.ip<>ip then
+			net.ip=ip
+			net.gatewayip=gateway_ip
+			net.netmask=netmask
+		end if
+	end if
+	
+	if interface=PL_SOCK_INTERFACE_WLN then
+		if renew=YES and wln.ip<>ip then
+			sys.reboot
+		end if
+		if wln.ip<>ip then
+			wln.ip=ip
+			wln.gatewayip=gateway_ip
+			wln.netmask=netmask
+		end if
+	end if
+	pat.play(PAT_TWO_SHORT_GREEN,PL_PAT_CANINT)
+end sub
+
+sub callback_dhcp_failure(interface as pl_sock_interfaces,failure_code as en_dhcp_status_codes)
+
+	pat.play(PAT_LONG_RED,PL_PAT_CANINT)
+	
+end sub
+
+sub callback_dhcp_pre_clear_ip(interface as pl_sock_interfaces)
+	
+end sub
+
+sub callback_dhcp_pre_buffrq(required_buff_pages as byte)
+	
+end sub
+
+sub callback_dhcp_buff_released()
+	
+end sub

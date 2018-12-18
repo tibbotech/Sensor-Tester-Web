@@ -4,22 +4,33 @@
 
 const CR_LF=chr(10)+chr(13)
 
+const PAT_ONE_SHORT_GREEN=			"---------------G~"
+const PAT_TWO_SHORT_GREEN=			"-------------G-G~"
+const PAT_THREE_SHORT_GREEN=		"-----------G-G-G"
+const PAT_THREE_SHORT_BOTH=			"--B-B-B--"
+const PAT_GREEN_ON=					"G~"
+const PAT_LONG_RED=					"RRRRRRRR-~"
+
 enum probetype
-	NONE,
 	TEMP,
 	TEMP_HUM,
 	LIGHT,
 	PRESSURE,
-	ACCELEROMETER
+	ACCELEROMETER,
+	NONE
 end enum
 
-
+include "sock\trunk\sock.tbh"
+include "dhcp\trunk\dhcp.tbh"
 include "super_i2c.tbh"
 include "ssi.tbh"
 include "tibbits.tbh"
 
+declare sub init_LEDS()
+declare sub init_sockets()
 declare sub detect_probe_type()
 declare sub get_probe_reading()
+declare sub set_LED(pattern as byte)
 declare sub polling_probe_leds()
 declare sub detect_probe_leds()
 
@@ -31,4 +42,3 @@ type probe_info
 end type
 
 declare current_probe_info as probe_info
-
