@@ -114,8 +114,6 @@ declare sub tbt36_write_reg(cmd as byte, data as byte)
 declare function tbt36_get_reg(cmd as byte) as byte
 declare sub tbt36_delay_msecond(value as word)
 
-
-
 dim format as byte
 dim i2c_num_tbt36 as byte
 dim tbt36_init_flag as word
@@ -334,17 +332,10 @@ function tbt30_init(use_ssi as no_yes) as ok_ng
 'there are no free SSI channels left. This doesn't mean failure. Rather, it means that comms will proceed in bit banging mood.
 
 	tbt30_init=OK
-	
-	#if TBT30_DEBUG_PRINT=1
-		tbt30_debug_print("++++++++++")
-	#endif
 
 	tbt30_init_flag=TBT30_INIT_SIGNATURE
 	i2c_num_tbt30=si2c_register("TBT30", DATA_PIN, CLK_PIN,use_ssi)
 
-	#if TBT30_DEBUG_PRINT=1
-		tbt30_debug_print("i2c num: "+str(i2c_num_tbt30))
-	#endif
 	if i2c_num_tbt30<4 then
 		ssi.channel=i2c_num_tbt30
 		ssi.enabled=NO
@@ -357,10 +348,6 @@ function tbt30_init(use_ssi as no_yes) as ok_ng
 		ssi.zmode=PL_SSI_ZMODE_ENABLED_ON_ZERO
 		ssi.enabled=YES
 	end if
-
-	#if TBT30_DEBUG_PRINT=1
-		tbt30_debug_print("----------")
-	#endif
 	
 	dim t,h as float
 
@@ -377,6 +364,7 @@ function tbt30_get_pc(byref humidity as float, byref temperature as float) as ok
 	tbt30_get_pc=OK
 	
 	dim temp,hum as word
+	dim id as byte=&h00
 	
 	tbt30_get_pc=tbt30_get(hum,temp)
 	
@@ -387,6 +375,11 @@ function tbt30_get_pc(byref humidity as float, byref temperature as float) as ok
 	temperature=temperature/16383
 	temperature=temperature*165
 	temperature=temperature-40
+	
+
+
+
+
 	
 	if humidity=100 then
 		tbt30_get_pc=NG
@@ -452,8 +445,6 @@ function tbt30_get(byref humidity as word, byref temperature as word)as ok_ng
 	tmp1=data1*4
 	humidity=tmp1*64+data2
 	
-
-
 	tmp1=data3*4
 	tmp1=tmp1/16
 	hi=data3/64*16
@@ -488,10 +479,6 @@ function tbt35_init(use_ssi as no_yes) as ok_ng
 
 	tbt35_init_flag=TBT35_INIT_SIGNATURE
 	i2c_num_tbt35=si2c_register("TBT35", DATA_PIN, CLK_PIN,use_ssi)
-
-	#if TBT35_DEBUG_PRINT=1
-		tbt35_debug_print("i2c num: "+str(i2c_num_tbt35))
-	#endif
 
 	if i2c_num_tbt35<4 then
 		ssi.channel=i2c_num_tbt35
@@ -803,9 +790,6 @@ function tbt35_get_kpa()as float
 	dim c12x2,a1,a1x1,y1,a2x2,pcomp as float
 
 	if tbt35_init_flag<>TBT35_INIT_SIGNATURE then
-	#if TBT35_DEBUG_PRINT=1
-		tbt35_debug_print("The lib is not initialized, call tbt35_init() first")
-	#endif
 		exit function
 	end if
 
@@ -868,10 +852,7 @@ function tbt36_init(use_ssi as no_yes)as ok_ng
 'go for direct I/O manipulation a.k.a. bit-banging (NO).
 'Note that there is a limited number of SSI channels so if you set use_ssi=YES this function may return NG, meaning that
 'there are no free SSI channels left. This doesn't mean failure. Rather, it means that comms will proceed in bit banging mood.
-	
-	#if TBT36_DEBUG_PRINT=1
-		adxl_debug_print("++++++++++")
-	#endif
+
 	tbt36_init=OK
 	tbt36_init_flag=TBT36_INIT_SIGNATURE
 
@@ -906,9 +887,6 @@ function tbt36_init(use_ssi as no_yes)as ok_ng
 
 	if id<>TBT36_DEVID then
 		tbt36_init=NG
-		#if TBT36_DEBUG_PRINT=1
-			adxl_debug_print("DEV ID ERR.")
-		#endif
 		goto leave
 	end if
 
@@ -1079,11 +1057,25 @@ function tbt36_get_reg(cmd as byte) as byte
 	tbt36_get_reg=tmp
 end function
 
-
 sub delay_msecond(value as word)
 	sys.timercountms=0
 	while sys.timercountms<value
 	wend
 end sub
 
+function tbt30_get_reg(cmd as byte) as byte
+	dim tmp as byte
+	si2c_start()
 
+	si2c_write(TBT30_WRITE_ADDR)
+	si2c_write(cmd)
+
+	si2c_start()
+
+	si2c_write(TBT30_READ_ADDR)
+	tmp=si2c_read(false)
+
+	si2c_stop()
+
+	tbt30_get_reg=tmp
+end function

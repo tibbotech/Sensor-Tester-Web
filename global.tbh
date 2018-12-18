@@ -20,6 +20,8 @@ include "tibbits.tbh"
 
 declare sub detect_probe_type()
 declare sub get_probe_reading()
+declare sub polling_probe_leds()
+declare sub detect_probe_leds()
 
 declare function parse_two_decimal_places(s as string) as string
 

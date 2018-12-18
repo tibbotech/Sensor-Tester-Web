@@ -100,10 +100,3 @@ format=
 condition=
 locked=no
 location=project
-[file12]
-path=15X21(HP).BIN
-type=binary
-format=
-condition=
-locked=no
-location=project

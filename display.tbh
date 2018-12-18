@@ -7,6 +7,7 @@ const PAT_LONG_RED=					"RRRRRRRR-~"
 
 
 declare sub lcd_init()
+declare sub clear_screen()
 declare sub set_LED(pattern as byte)
 declare sub no_probe_detected_screen()
 declare sub probe_reading_screen()

@@ -2,6 +2,8 @@ include "global.tbh"
 include "display.tbh"
 
 dim current_probe_info as probe_info
+dim led_probe_timer, led_detect_timer as byte
+dim pattern_timer as dword = sys.timercount32
 
 '====================================================================
 sub on_sys_init()
@@ -26,7 +28,7 @@ sub detect_probe_type()
 	no_probe_detected_screen()
 	
 	while current_probe_info.probe_type=NONE
-		
+		detect_probe_leds()		
 		if tbt28_init(YES)=OK then
 			current_probe_info.probe_type=LIGHT
 			light_screen()
@@ -58,7 +60,9 @@ end sub
 
 sub get_probe_reading()
 	
+	polling_probe_leds()
 	dim s as string
+	
 	select case current_probe_info.probe_type
 	
 	case LIGHT:
@@ -112,8 +116,6 @@ sub get_probe_reading()
 
 	end select
 	
-	'probe_reading_screen()
-	
 end sub
 
 function parse_two_decimal_places(s as string) as string
@@ -130,3 +132,45 @@ function parse_two_decimal_places(s as string) as string
 	parse_two_decimal_places=s
 
 end function
+
+sub polling_probe_leds()
+	
+	pat.play(PAT_GREEN_ON,PL_PAT_CANINT)
+	led_probe_timer=led_probe_timer+1
+	if led_probe_timer>=2 then
+		set_LED(&b00000)
+		led_probe_timer=0
+	else
+		set_LED(&b11111)
+	end if
+			
+end sub
+
+sub detect_probe_leds()
+	
+	
+	pat.play(PAT_GREEN_ON,PL_PAT_CANINT)
+	if sys.timercount32-pattern_timer>=1 then
+		if led_detect_timer<4 then
+			led_detect_timer=led_detect_timer+1
+		else
+			led_detect_timer=0
+		end if
+		pattern_timer = sys.timercount32
+	end if
+	
+	select case led_detect_timer
+	case 0:
+		set_LED(&b00001)
+	case 1:
+		set_LED(&b00010)
+	case 2:
+		set_LED(&b00100)
+	case 3:
+		set_LED(&b01000)
+	case 4:
+		set_LED(&b10000)
+	end select	
+	
+
+end sub 
