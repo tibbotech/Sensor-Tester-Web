@@ -23,7 +23,7 @@ class MainMenu extends React.Component {
   constructor() {
     super();
     $.ajaxSetup({ cache: false });
-    this.state = { probe: null, reading: "" }
+    this.state = { probe: null, reading: null }
     this.updateJSON();
   }
 
@@ -37,7 +37,7 @@ class MainMenu extends React.Component {
   }
 
   render() {
-    if (this.state.probe === 0) {
+    if (this.state.probe === "Unknown") {
       return (
         <div>
           <div>

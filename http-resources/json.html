@@ -3,7 +3,6 @@ include "global.tbh"
 dim b as byte
 ?>
 {
-"probe":"<?sock.setdata(str(current_probe_info.probe_type))?>",
-"reading":"<?sock.setdata(str(current_probe_info.reading))?>",
-"test":"test"
+"probe":<?sock.setdata(str(current_probe_info.probe_type))?>,
+"reading":"<?sock.setdata(current_probe_info.reading)?>"
 }
