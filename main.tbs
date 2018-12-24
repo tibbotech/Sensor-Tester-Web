@@ -75,7 +75,7 @@ sub get_probe_reading()
 	
 	case TEMP: 
 			s=ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)
-			s=parse_two_decimal_places(s)+"C"
+			s=parse_two_decimal_places(s)+"°C"
 			current_probe_info.reading=s			
 			if tbt29_read_data(TBT29_REG_MFGID)<>TBT29_MFG_ID then
 				current_probe_info.probe_type=NONE
@@ -88,7 +88,7 @@ sub get_probe_reading()
 			hum=ftostr(h,FTOSTR_MODE_AUTO,5)
 			hum=parse_two_decimal_places(hum)+"%"
 			temp=ftostr(t,FTOSTR_MODE_AUTO,5)
-			temp=parse_two_decimal_places(temp)+"C "
+			temp=parse_two_decimal_places(temp)+"°C "
 			current_probe_info.reading=temp+hum
 		else
 			current_probe_info.probe_type=NONE
@@ -99,7 +99,8 @@ sub get_probe_reading()
 		s=parse_two_decimal_places(s)+" kPa"
 		current_probe_info.reading=s
 		dim w as word=tbt35_get_kpa()
-		if w=50 or w=436 or w=175 or w=567 or w=566 or w=18 then
+		if w=17 or w=50 or w=436 or w=175 or w=567 or w=566 or w=18 then
+			sys.debugprint(str(w)+"\r\n")
 			current_probe_info.probe_type=NONE
 		end if
 

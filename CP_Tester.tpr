@@ -1,7 +1,7 @@
 [project]
 version=1
 platform=TPP2W(G2)
-src_lib_ver=2_01_00
+src_lib_ver=2_01_02
 name=CP_Tester
 output=CP_Tester.tpc
 debug=on
