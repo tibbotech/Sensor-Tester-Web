@@ -21,9 +21,9 @@ If a sensor is connected, the following will be displayed:
 
 
 
-If no sensor is connected, a prompt to connect a sensor will be displayed.
+If no *Cable Probe Sensor* is connected, a prompt to connect a sensor will be displayed.
 
 
 
-Sensors can be plugged an unplugged while the application is still running.
+*Cable Probe Sensors* can be connected and disconnected while the application is still running.
 
