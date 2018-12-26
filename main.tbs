@@ -55,62 +55,41 @@ sub detect_probe_type()
 		current_probe_info.probe_type=ACCELEROMETER
 	end if
 	
+	current_probe_info.reading=""
+	
 end sub
 
 sub get_probe_reading()
 	
 	polling_probe_leds()
-	dim s as string
-	
+
 	select case current_probe_info.probe_type
 	
 	case LIGHT:
-		if tbt28_check()=OK then
-			current_probe_info.reading=str(tbt28_get())+" lux"
-		else
+		if tbt28_check()<>OK then
 			current_probe_info.probe_type=NONE
 		end if
 	
 	case TEMP: 
-		if tbt29_read_data(TBT29_REG_MFGID)<>TBT29_MFG_ID then
-			current_probe_info.probe_type=NONE
-		else
-			s=ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)
-			s=parse_two_decimal_places(s)+"°C"
-			current_probe_info.reading=s			
+		if tbt29_check()<>OK then
+			current_probe_info.probe_type=NONE	
 		end if
 		
 	case TEMP_HUM: 
-		if tbt30_check()=OK then
-			dim t,h as float
-			dim temp, hum as string
-			tbt30_get_pc(h,t)
-			hum=ftostr(h,FTOSTR_MODE_AUTO,5)
-			hum=parse_two_decimal_places(hum)+"%"
-			temp=ftostr(t,FTOSTR_MODE_AUTO,5)
-			temp=parse_two_decimal_places(temp)+"°C "
-			current_probe_info.reading=temp+hum
-		else
+		if tbt30_check()<>OK then
 			current_probe_info.probe_type=NONE
 		end if
 		
 	case PRESSURE: 
-		if tbt35_check()=OK then
-			s=ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)
-			s=parse_two_decimal_places(s)+" kPa"
-			current_probe_info.reading=s
-		else
+		if tbt35_check()<>OK then
 			current_probe_info.probe_type=NONE
 		end if
 
 	case ACCELEROMETER: 
-		if tbt36_check()=OK then
-			dim x,y,z as integer
-			tbt36_get_mg(x,y,z)
-			current_probe_info.reading="X="+stri(x)+" Y="+stri(y)+" Z="+stri(z)
-		else
+		if tbt36_check()<>OK then
 			current_probe_info.probe_type=NONE
 		end if
+		
 	end select
 	
 end sub

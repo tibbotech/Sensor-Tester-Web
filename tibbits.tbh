@@ -24,9 +24,10 @@ declare function tbt29_read_data(op as tbt29_regs) as word
 
 declare function tbt28_init(use_ssi as no_yes)as ok_ng
 declare function tbt28_check() as ok_ng
-declare function tbt28_get() as word
+declare function tbt28_get(readingsrawdata as byte(2)) as word
 
 declare function tbt29_init(use_ssi as no_yes) as errcheck
+declare function tbt29_check() as ok_ng
 declare function tbt29_get_c() as real
 declare function tbt29_get() as integer
 

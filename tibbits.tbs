@@ -35,7 +35,6 @@ declare sub delay_msecond(value as word)
 dim i2c_num_tbt29 as byte
 dim tbt29_init_flag as word
 
-
 const TBT30_INIT_SIGNATURE=&h3969
 const TBT30_STAMP="TBT30> "
 const TBT30_CR_LF=chr(13)+chr(10)
@@ -112,7 +111,6 @@ const TBT36_REG_ORIENT			=&h3C
 
 declare sub tbt36_write_reg(cmd as byte, data as byte)
 declare function tbt36_get_reg(cmd as byte) as byte
-declare sub tbt36_delay_msecond(value as word)
 
 dim format as byte
 dim i2c_num_tbt36 as byte
@@ -125,7 +123,6 @@ function tbt28_init(use_ssi as no_yes)as ok_ng
 'go for direct I/O manipulation a.k.a. bit-banging (NO).
 'Note that there is a limited number of SSI channels so if you set use_ssi=YES this function may return NG, meaning that
 'there are no free SSI channels left. This doesn't mean failure. Rather, it means that comms will proceed in bit banging mood.
-	
 	tbt28_init=OK
 	tbt28_init_flag=TBT28_INIT_SIGNATURE
 
@@ -171,7 +168,6 @@ function tbt28_check() as ok_ng
 	dim readingsrawdata as byte(2)
 	dim b as byte
 	'Returns a 16-bit number expressing relative ambient light intensity.
-	dim upper,lower as byte
 	if tbt28_init_flag<> TBT28_INIT_SIGNATURE then
 		exit function
 	end if
@@ -188,24 +184,10 @@ function tbt28_check() as ok_ng
 		end if
 	next b
 	
+	current_probe_info.reading=str(readingsrawdata(0)*256+readingsrawdata(1))+" lux"
+	
 end function
 
-
-function tbt28_get() as word
-'Returns a 16-bit number expressing relative ambient light intensity.
-	dim upper,lower as byte
-	tbt28_get=0
-	if tbt28_init_flag<> TBT28_INIT_SIGNATURE then
-		exit function
-	end if
-	si2c_get(i2c_num_tbt28)
-	si2c_start()
-	si2c_write(TBT28_READ_ADDR)
-	upper=si2c_read(true)
-	lower=si2c_read(false)
-	si2c_stop()
-	tbt28_get=upper*256+lower
-end function
 
 sub tbt28_cmd_send(cmd as byte)
 	si2c_start()
@@ -213,7 +195,6 @@ sub tbt28_cmd_send(cmd as byte)
 	si2c_write(cmd)
 	si2c_stop()
 end sub
-
 
 function tbt29_init(use_ssi as no_yes) as errcheck
 'Call this function to initialize the Tibbit.
@@ -265,7 +246,6 @@ function tbt29_get_c() as real
 	tbt29_get_c=tbt29_get()
 	tbt29_get_c=tbt29_get_c/4
 end function
-
 
 function tbt29_get() as integer
 'Returns the signed integer value expressing the temperature in 0.25 deg. C steps.	
@@ -326,6 +306,42 @@ function tbt29_read_data(op as tbt29_regs) as word
 	tbt29_read_data=upper*256+lower
 end function
 
+function tbt29_check() as ok_ng
+	tbt29_check=NG
+	dim check as byte
+	dim upper,lower as byte=0
+
+	upper=0
+	lower=0
+	si2c_get(i2c_num_tbt29)
+	si2c_start()
+
+	'send address + op
+	si2c_write(TBT29_WRITE_ADDR)
+	si2c_write(TBT29_REG_MFGID)
+	
+	si2c_start()
+
+	si2c_write(TBT29_READ_ADDR)
+
+	if TBT29_REG_MFGID=TBT29_REG_RESOL then
+		lower=si2c_read(true)
+	else
+		upper=si2c_read(true)
+		lower=si2c_read(false)
+	end if
+
+	si2c_stop()
+ 	
+	check=upper*256+lower
+	
+	if check=TBT29_MFG_ID then
+		tbt29_check=OK
+	end if
+	current_probe_info.reading=ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)
+	current_probe_info.reading=parse_two_decimal_places(current_probe_info.reading)+"°C"
+end function
+
 sub tbt29_write_data(op as tbt29_regs,data as word)
 	dim value as byte
 	si2c_get(i2c_num_tbt29) 
@@ -353,7 +369,6 @@ function tbt30_init(use_ssi as no_yes) as ok_ng
 'go for direct I/O manipulation a.k.a. bit-banging (NO).
 'Note that there is a limited number of SSI channels so if you set use_ssi=YES this function may return NG, meaning that
 'there are no free SSI channels left. This doesn't mean failure. Rather, it means that comms will proceed in bit banging mood.
-
 	tbt30_init_flag=TBT30_INIT_SIGNATURE
 	i2c_num_tbt30=si2c_register("TBT30", DATA_PIN, CLK_PIN,use_ssi)
 
@@ -371,9 +386,6 @@ function tbt30_init(use_ssi as no_yes) as ok_ng
 	end if
 	
 
-	
-	dim t,h as float
-
 	tbt30_init=tbt30_check()
 	
 end function
@@ -383,7 +395,6 @@ function tbt30_check() as ok_ng
 	tbt30_check=NG
 	dim b as byte
 	dim readingsrawdata as byte(4)
-	dim status as tbt30_status
 	
 	if tbt30_init_flag<>TBT30_INIT_SIGNATURE then
 		exit function
@@ -413,10 +424,17 @@ function tbt30_check() as ok_ng
 		end if
 	next b
 	
+	dim t,h as float
+	dim temp, hum as string
+	tbt30_get_pc(h,t)
+	hum=ftostr(h,FTOSTR_MODE_AUTO,5)
+	hum=parse_two_decimal_places(hum)+"%"
+	temp=ftostr(t,FTOSTR_MODE_AUTO,5)
+	temp=parse_two_decimal_places(temp)+"°C "
+	current_probe_info.reading = temp+hum
 
 
 end function
-
 
 function tbt30_get_pc(byref humidity as float, byref temperature as float) as ok_ng
 'Returns "real" humidity and temperature data expressed in %PH and degrees C.
@@ -822,17 +840,12 @@ function tbt35_init(use_ssi as no_yes) as ok_ng
 end function
 
 
-function tbt35_get() as word
-'Returns the word value expressing the pressure in 10 Pa steps.
-	tbt35_get=tbt35_get_kpa()*100
-end function
-
 function tbt35_check() as ok_ng
-
 
 	tbt35_check=NG
 	dim b as byte
 	dim readingsrawdata as byte(4)
+	
 	
 
 	if tbt35_init_flag<>TBT35_INIT_SIGNATURE then
@@ -869,13 +882,13 @@ function tbt35_check() as ok_ng
 	si2c_stop()
 	
 	for b=0 to 3
-		sys.debugprint(str(readingsrawdata(b))+"\r\n")
 		if readingsrawdata(b)<>255 and readingsrawdata(b)<>127 then
 			tbt35_check=OK
 			exit for
 		end if
 	next b
-	
+	current_probe_info.reading=ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)
+	current_probe_info.reading=parse_two_decimal_places(current_probe_info.reading)+" kPa"
 
 end function
 
@@ -1026,32 +1039,6 @@ sub tbt36_get_mg(byref x_value as integer, byref y_value as integer, byref z_val
 end sub
 
 function tbt36_check() as ok_ng
-
-'	dim b as byte
-'	dim readingsrawdata as byte(6)
-	
-
-'	si2c_get(i2c_num_tbt36)
-'	tbt36_write_reg(TBT36_REG_POWER_CTL,&h08)
-
-'	'Read X axis value
-'	readingsrawdata(0)=tbt36_get_reg(TBT36_REG_DATA_X1)
-'	readingsrawdata(1)=tbt36_get_reg(TBT36_REG_DATA_X0)
-	
-'	'Read Y axis value
-'	readingsrawdata(2)=tbt36_get_reg(TBT36_REG_DATA_Y1)
-'	readingsrawdata(3)=tbt36_get_reg(TBT36_REG_DATA_Y0)
-	
-'	'Read Z axis value
-'	readingsrawdata(4)=tbt36_get_reg(TBT36_REG_DATA_Z1)
-'	readingsrawdata(5)=tbt36_get_reg(TBT36_REG_DATA_Z0)
-	
-'	for b=0 to 6
-'		if readingsrawdata(b)<>255 then
-'			tbt35_check=OK
-'			exit for
-'		end if
-'	next b
 	
 	dim id as byte=&h00
 	
@@ -1062,6 +1049,10 @@ function tbt36_check() as ok_ng
 	else
 		tbt36_check=OK
 	end if
+	
+	dim x,y,z as integer
+	tbt36_get_mg(x,y,z)
+	current_probe_info.reading="X="+stri(x)+" Y="+stri(y)+" Z="+stri(z)
 	
 	
 end function
