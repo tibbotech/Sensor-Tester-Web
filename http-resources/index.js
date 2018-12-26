@@ -26,7 +26,7 @@ class MainMenu extends React.Component {
     if (this.state.probetype === "Unknown") {
       return (
         <div>
-          <br></br><h1>No Probes Detected!</h1> <br></br>
+          <br></br><h1>No Probe Detected!</h1> <br></br>
           <h2>Please ensure probe is connected correctly</h2>
         </div>
       )
