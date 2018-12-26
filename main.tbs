@@ -23,7 +23,6 @@ sub on_sys_timer()
 		case else:
 			get_probe_reading()
 	end select
-
 			
 end sub
 
@@ -34,7 +33,6 @@ sub on_sock_data_arrival()
 end sub
 
 sub detect_probe_type()
-
 
 	detect_probe_leds()		
 	if tbt28_init(YES)=OK then
@@ -56,7 +54,6 @@ sub detect_probe_type()
 	if tbt36_init(NO)=OK then
 		current_probe_info.probe_type=ACCELEROMETER
 	end if
-
 	
 end sub
 
@@ -68,23 +65,26 @@ sub get_probe_reading()
 	select case current_probe_info.probe_type
 	
 	case LIGHT:
+		if tbt28_check()=OK then
 			current_probe_info.reading=str(tbt28_get())+" lux"
-			if tbt28_get()=65535 then
-				current_probe_info.probe_type=NONE
-			end if
+		else
+			current_probe_info.probe_type=NONE
+		end if
 	
 	case TEMP: 
+		if tbt29_read_data(TBT29_REG_MFGID)<>TBT29_MFG_ID then
+			current_probe_info.probe_type=NONE
+		else
 			s=ftostr(tbt29_get_c(),FTOSTR_MODE_AUTO,4)
 			s=parse_two_decimal_places(s)+"°C"
 			current_probe_info.reading=s			
-			if tbt29_read_data(TBT29_REG_MFGID)<>TBT29_MFG_ID then
-				current_probe_info.probe_type=NONE
-			end if
+		end if
 		
 	case TEMP_HUM: 
-		dim t,h as float
-		dim temp, hum as string
-		if tbt30_get_pc(h,t)=OK then
+		if tbt30_check()=OK then
+			dim t,h as float
+			dim temp, hum as string
+			tbt30_get_pc(h,t)
 			hum=ftostr(h,FTOSTR_MODE_AUTO,5)
 			hum=parse_two_decimal_places(hum)+"%"
 			temp=ftostr(t,FTOSTR_MODE_AUTO,5)
@@ -95,23 +95,22 @@ sub get_probe_reading()
 		end if
 		
 	case PRESSURE: 
-		s=ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)
-		s=parse_two_decimal_places(s)+" kPa"
-		current_probe_info.reading=s
-		dim w as word=tbt35_get_kpa()
-		if w=17 or w=50 or w=436 or w=175 or w=567 or w=566 or w=18 then
-			sys.debugprint(str(w)+"\r\n")
+		if tbt35_check()=OK then
+			s=ftostr(tbt35_get_kpa(),FTOSTR_MODE_AUTO,5)
+			s=parse_two_decimal_places(s)+" kPa"
+			current_probe_info.reading=s
+		else
 			current_probe_info.probe_type=NONE
 		end if
 
 	case ACCELEROMETER: 
-		dim x,y,z as integer
-		tbt36_get_mg(x,y,z)
-		current_probe_info.reading="X="+stri(x)+" Y="+stri(y)+" Z="+stri(z)
-		if x=0 and y=0 and z=0 then
+		if tbt36_check()=OK then
+			dim x,y,z as integer
+			tbt36_get_mg(x,y,z)
+			current_probe_info.reading="X="+stri(x)+" Y="+stri(y)+" Z="+stri(z)
+		else
 			current_probe_info.probe_type=NONE
 		end if
-
 	end select
 	
 end sub
@@ -264,5 +263,37 @@ sub callback_dhcp_pre_buffrq(required_buff_pages as byte)
 end sub
 
 sub callback_dhcp_buff_released()
+	
+end sub
+
+sub callback_wln_failure(wln_state as en_wln_status_codes)
+	
+end sub
+
+sub callback_wln_ok()
+	
+end sub
+
+sub callback_wln_pre_buffrq(required_buff_pages as byte)
+
+end sub
+
+sub callback_wln_mkey_progress_update(progress as byte)
+	
+end sub
+
+sub callback_wln_rescan_result(current_rssi as byte, scan_rssi as byte, different_ap as no_yes)
+	
+end sub
+
+sub callback_wln_debugprint(print_data as string)
+	
+end sub
+
+sub callback_wln_rescan_for_better_ap()
+	
+end sub
+
+sub callback_wln_starting_association()
 	
 end sub

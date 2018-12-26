@@ -23,17 +23,25 @@ end enum
 declare function tbt29_read_data(op as tbt29_regs) as word
 
 declare function tbt28_init(use_ssi as no_yes)as ok_ng
+declare function tbt28_check() as ok_ng
 declare function tbt28_get() as word
+
 declare function tbt29_init(use_ssi as no_yes) as errcheck
 declare function tbt29_get_c() as real
 declare function tbt29_get() as integer
+
 declare function tbt30_init(use_ssi as no_yes) as ok_ng
+declare function tbt30_check() as ok_ng
 declare function tbt30_get_pc(byref humidity as float, byref temperature as float) as ok_ng
 declare function tbt30_get(byref humidity as word, byref temperature as word) as ok_ng
+
 declare function tbt35_init(use_ssi as no_yes) as ok_ng
+declare function tbt35_check() as ok_ng
 declare function tbt35_get() as word
 declare function tbt35_get_kpa()as float
+
 declare function tbt36_init(use_ssi as no_yes)as ok_ng
+declare function tbt36_check() as ok_ng
 declare sub tbt36_get_mg(byref x_value as integer, byref y_value as integer, byref z_value as integer)
 declare sub tbt36_get(byref x_value as integer, byref y_value as integer, byref z_value as integer)
 

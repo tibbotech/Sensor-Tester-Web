@@ -162,11 +162,34 @@ function tbt28_init(use_ssi as no_yes)as ok_ng
 	'Wait to complete 1st Auto-resolution mode measurement.(max. 180 ms)
 	delay_msecond(DELAY_50MS+DELAY_50MS+DELAY_50MS)
 
-	if tbt28_get()=65535 then
-		tbt28_init=NG
-	end if
+	tbt28_init=tbt28_check()
 	
 end function
+
+function tbt28_check() as ok_ng
+	tbt28_check=NG
+	dim readingsrawdata as byte(2)
+	dim b as byte
+	'Returns a 16-bit number expressing relative ambient light intensity.
+	dim upper,lower as byte
+	if tbt28_init_flag<> TBT28_INIT_SIGNATURE then
+		exit function
+	end if
+	si2c_get(i2c_num_tbt28)
+	si2c_start()
+	si2c_write(TBT28_READ_ADDR)
+	readingsrawdata(0)=si2c_read(true)
+	readingsrawdata(1)=si2c_read(false)
+	si2c_stop()
+	for b=0 to 1
+		if readingsrawdata(b)<>255 then
+			tbt28_check=OK
+			exit for
+		end if
+	next b
+	
+end function
+
 
 function tbt28_get() as word
 'Returns a 16-bit number expressing relative ambient light intensity.
@@ -331,8 +354,6 @@ function tbt30_init(use_ssi as no_yes) as ok_ng
 'Note that there is a limited number of SSI channels so if you set use_ssi=YES this function may return NG, meaning that
 'there are no free SSI channels left. This doesn't mean failure. Rather, it means that comms will proceed in bit banging mood.
 
-	tbt30_init=OK
-
 	tbt30_init_flag=TBT30_INIT_SIGNATURE
 	i2c_num_tbt30=si2c_register("TBT30", DATA_PIN, CLK_PIN,use_ssi)
 
@@ -349,13 +370,53 @@ function tbt30_init(use_ssi as no_yes) as ok_ng
 		ssi.enabled=YES
 	end if
 	
+
+	
 	dim t,h as float
 
-	if tbt30_get_pc(h,t)<>OK then
-		tbt30_init=NG
-	end if	
+	tbt30_init=tbt30_check()
 	
 end function
+
+function tbt30_check() as ok_ng
+
+	tbt30_check=NG
+	dim b as byte
+	dim readingsrawdata as byte(4)
+	dim status as tbt30_status
+	
+	if tbt30_init_flag<>TBT30_INIT_SIGNATURE then
+		exit function
+	end if
+
+	si2c_get(i2c_num_tbt30)
+
+	'send the measurement request
+	si2c_start()
+	si2c_write(TBT30_WRITE_ADDR)
+	si2c_stop()
+	delay_msecond(DELAY_50MS)
+
+	'fetch humidity data
+	si2c_start()
+	si2c_write(TBT30_READ_ADDR)
+	readingsrawdata(0)=si2c_read(true)
+	readingsrawdata(1)=si2c_read(true)
+	readingsrawdata(2)=si2c_read(true)
+	readingsrawdata(3)=si2c_read(false)
+	si2c_stop()
+	
+	for b=0 to 3
+		if readingsrawdata(b)<>255 then
+			tbt30_check=OK
+			exit for
+		end if
+	next b
+	
+
+
+end function
+
 
 function tbt30_get_pc(byref humidity as float, byref temperature as float) as ok_ng
 'Returns "real" humidity and temperature data expressed in %PH and degrees C.
@@ -375,15 +436,6 @@ function tbt30_get_pc(byref humidity as float, byref temperature as float) as ok
 	temperature=temperature/16383
 	temperature=temperature*165
 	temperature=temperature-40
-	
-
-
-
-
-	
-	if humidity=100 then
-		tbt30_get_pc=NG
-	end if
 	
 end function
 
@@ -474,8 +526,6 @@ function tbt35_init(use_ssi as no_yes) as ok_ng
 'there are no free SSI channels left. This doesn't mean failure. Rather, it means that comms will proceed in bit banging mood.
 	dim tmp as byte
 	dim a0_tmp,b1_tmp,b2_tmp,c12_tmp,tmp2 as word
-
-	tbt35_init=OK
 
 	tbt35_init_flag=TBT35_INIT_SIGNATURE
 	i2c_num_tbt35=si2c_register("TBT35", DATA_PIN, CLK_PIN,use_ssi)
@@ -767,19 +817,66 @@ function tbt35_init(use_ssi as no_yes) as ok_ng
 		c12=-c12
 	end if
 	
-	dim w as word=tbt35_get_kpa()
-	
-	if w=50 or w=436 or w=175 or w=179 or w=567 or w=566 then
-		tbt35_init=NG
-	else 
-		sys.debugprint("XX")
-	end if
+	tbt35_init=tbt35_check()	
 
 end function
+
 
 function tbt35_get() as word
 'Returns the word value expressing the pressure in 10 Pa steps.
 	tbt35_get=tbt35_get_kpa()*100
+end function
+
+function tbt35_check() as ok_ng
+
+
+	tbt35_check=NG
+	dim b as byte
+	dim readingsrawdata as byte(4)
+	
+
+	if tbt35_init_flag<>TBT35_INIT_SIGNATURE then
+		exit function
+	end if
+
+	si2c_get(i2c_num_tbt35)
+
+	si2c_start()
+	si2c_write(TBT35_WRITE_ADDR)
+	si2c_write(TBT35_CMD_START_CONVERSION)
+	si2c_write(&h00)
+	si2c_stop()
+
+	'Time between start convert command and data available in the Pressure and Temperature registers
+	#if PLATFORM_TYPE_32
+		delay_msecond(1)
+	#else
+		delay_msecond(3)
+	#endif
+
+	si2c_start()
+
+	si2c_write(TBT35_WRITE_ADDR)
+	si2c_write(TBT35_CMD_READ_PRESSURE)
+
+	si2c_start()
+	si2c_write(TBT35_READ_ADDR)
+
+	readingsrawdata(0)=si2c_read(true)
+	readingsrawdata(1)=si2c_read(true)
+	readingsrawdata(2)=si2c_read(true)
+	readingsrawdata(3)=si2c_read(false)
+	si2c_stop()
+	
+	for b=0 to 3
+		sys.debugprint(str(readingsrawdata(b))+"\r\n")
+		if readingsrawdata(b)<>255 and readingsrawdata(b)<>127 then
+			tbt35_check=OK
+			exit for
+		end if
+	next b
+	
+
 end function
 
 
@@ -927,6 +1024,47 @@ sub tbt36_get_mg(byref x_value as integer, byref y_value as integer, byref z_val
 	y_value=(ly*2930)/1000
 	z_value=(lz*2930)/1000
 end sub
+
+function tbt36_check() as ok_ng
+
+'	dim b as byte
+'	dim readingsrawdata as byte(6)
+	
+
+'	si2c_get(i2c_num_tbt36)
+'	tbt36_write_reg(TBT36_REG_POWER_CTL,&h08)
+
+'	'Read X axis value
+'	readingsrawdata(0)=tbt36_get_reg(TBT36_REG_DATA_X1)
+'	readingsrawdata(1)=tbt36_get_reg(TBT36_REG_DATA_X0)
+	
+'	'Read Y axis value
+'	readingsrawdata(2)=tbt36_get_reg(TBT36_REG_DATA_Y1)
+'	readingsrawdata(3)=tbt36_get_reg(TBT36_REG_DATA_Y0)
+	
+'	'Read Z axis value
+'	readingsrawdata(4)=tbt36_get_reg(TBT36_REG_DATA_Z1)
+'	readingsrawdata(5)=tbt36_get_reg(TBT36_REG_DATA_Z0)
+	
+'	for b=0 to 6
+'		if readingsrawdata(b)<>255 then
+'			tbt35_check=OK
+'			exit for
+'		end if
+'	next b
+	
+	dim id as byte=&h00
+	
+	id=tbt36_get_reg(TBT36_REG_DEVID)
+
+	if id<>TBT36_DEVID then
+		tbt36_check=NG
+	else
+		tbt36_check=OK
+	end if
+	
+	
+end function
 
 sub tbt36_get(byref x_value as integer, byref y_value as integer, byref z_value as integer)
 'Returns three signed values expressing the acceleration.

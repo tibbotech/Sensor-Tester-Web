@@ -2,10 +2,10 @@
 version=1
 platform=TPP2W(G2)
 src_lib_ver=2_01_02
-name=CP_Tester
-output=CP_Tester.tpc
+name=CP-Tester-Web
+output=CP-Tester-Web.tpc
 debug=on
-defines= /dLCD_TYPE=SOLOMON_SSD1963 /dOBJECT_LCD=LCD_ENABLED /dWLN_AVAILABLE=0 /dDHCP_DEBUG_PRINT=1 /dOBJECT_FD=FD_ENABLED /dOBJECT_KP=KP_ENABLED /dOBJECT_WLN=WLN_ENABLED
+defines= /dLCD_TYPE=SOLOMON_SSD1963 /dOBJECT_LCD=LCD_ENABLED /dDHCP_DEBUG_PRINT=1 /dWLN_AVAILABLE=1 /dOBJECT_FD=FD_ENABLED /dOBJECT_KP=KP_ENABLED /dOBJECT_WLN=WLN_ENABLED
 transport=udp_winpcap
 [address1]
 platform=TPP2W
@@ -156,3 +156,17 @@ format=65001
 condition=
 locked=no
 location=project
+[file20]
+path=wln\trunk\wln.tbh
+type=header
+format=
+condition=
+locked=yes
+location=commonlib
+[file21]
+path=wln\trunk\wln.tbs
+type=basic
+format=
+condition=
+locked=yes
+location=commonlib
