@@ -13,17 +13,14 @@ This application uses a web interface to allow the user to interact with Tibbo *
 
 ## Main Screen
 
-If a sensor is connected, the following will be displayed:
+If a *Cable Probe Sensor* is connected, the following will be displayed:
 
-- The sensor ID
-- The sensor type
-- The sensor reading
-
-
-
-If no *Cable Probe Sensor* is connected, a prompt to connect a sensor will be displayed.
+- The *Cable Probe Sensor* ID
+- The *Cable Probe Sensor* type
+- The *Cable Probe Sensor* reading
 
 
+
+If no *Cable Probe Sensor* is connected, a prompt to connect a *Cable Probe Sensor* will be displayed.
 
 *Cable Probe Sensors* can be connected and disconnected while the application is still running.
-
