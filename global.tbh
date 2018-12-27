@@ -41,6 +41,7 @@ declare function convert_accelerometer_values(value as string) as string
 type probe_info
 	probe_type as probetype
 	reading as string
+	temp_warning as byte
 end type
 
 declare current_probe_info as probe_info

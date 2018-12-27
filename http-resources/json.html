@@ -4,5 +4,6 @@ dim b as byte
 ?>
 {
 "probe":<?sock.setdata(str(current_probe_info.probe_type))?>,
-"reading":"<?sock.setdata(current_probe_info.reading)?>"
+"reading":"<?sock.setdata(current_probe_info.reading)?>",
+"warning":"<?sock.setdata(str(current_probe_info.temp_warning))?>"
 }
