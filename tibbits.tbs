@@ -271,6 +271,7 @@ function tbt29_get() as integer
 		t_integer=(r and &h0FFF)/16
 		t_fraction=(r and &h000F)/4
 		tbt29_get=1024-((t_integer*4)+t_fraction)
+		tbt29_get=tbt29_get*-1
 	else	
 		'temperature is positive
 		t_integer=(r and &h0FFF)/16
