@@ -9,9 +9,9 @@ class MainMenu extends React.Component {
   updateJSON() {
     var sensorTypes = [
       ["Unknown",""], 
-      ["BP#01 or Tibbit 29", "Ambient Temperature sensor"],
+      ["BP#01 or Tibbit 29", "Ambient Temperature Sensor"],
       ["BP#02 or Tibbit 30","Ambient Temperature & Humidity Sensor"],
-      ["BP#03 or Tibbit 28","Ambient Light sensor"],
+      ["BP#03 or Tibbit 28","Ambient Light Sensor"],
       ["Tibbit 36","3-Axis Accelerometer"],
       ["Tibbit 35","Barometric Pressure Sensor"]
     ]
