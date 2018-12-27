@@ -425,7 +425,7 @@ function tbt30_check() as ok_ng
 		end if
 	next b
 	
-	dim t,h as float
+	dim t,h as real
 	dim temp, hum as string
 	tbt30_get_pc(h,t)
 	hum=ftostr(h,FTOSTR_MODE_AUTO,5)
@@ -513,8 +513,9 @@ function tbt30_get(byref humidity as word, byref temperature as word)as ok_ng
 
 	'humidity:   Data1 [13:6] + Data2 [7:0]
 	'temerature: Data3 [13:6] + Data4 [5:0]
-	tmp1=data1*4
-	humidity=tmp1*64+data2
+	'tmp1=data1*4
+	'humidity=tmp1*64+data2
+	humidity = (tmp1 and &h3F) *256 + data2
 	
 	tmp1=data3*4
 	tmp1=tmp1/16

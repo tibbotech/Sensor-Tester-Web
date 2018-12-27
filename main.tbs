@@ -95,14 +95,16 @@ sub get_probe_reading()
 end sub
 
 function parse_two_decimal_places(s as string) as string
-	dim b as byte
-	b=instr(1,s,".",1)
-	if b=0 then
+	
+	dim decpoint as byte
+	decpoint=instr(1,s,".",1)
+	dim digitsafterpoint as byte=len(s)-decpoint
+	if decpoint=0 then
 		s=s+".00"
-	else if len(s)-b=1 then
+	else if digitsafterpoint=1 then
 		s=s+"0"
-	else if len(s)-b=3 then
-		s=left(s,len(s)-1)
+	else if digitsafterpoint>2 then
+		s=left(s,len(s)-digitsafterpoint+2)
 	end if
 	
 	parse_two_decimal_places=s
