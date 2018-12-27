@@ -36,6 +36,7 @@ declare sub polling_probe_leds()
 declare sub detect_probe_leds()
 
 declare function parse_two_decimal_places(s as string) as string
+declare function convert_accelerometer_values(value as string) as string
 
 type probe_info
 	probe_type as probetype

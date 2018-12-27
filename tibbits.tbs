@@ -1033,9 +1033,9 @@ sub tbt36_get_mg(byref x_value as integer, byref y_value as integer, byref z_val
 	lx=x_value
 	ly=y_value
 	lz=z_value
-	x_value=(lx*2930)/1000
-	y_value=(ly*2930)/1000
-	z_value=(lz*2930)/1000
+	x_value=(lx*2930)/100
+	y_value=(ly*2930)/100
+	z_value=(lz*2930)/100
 end sub
 
 function tbt36_check() as ok_ng
@@ -1052,8 +1052,56 @@ function tbt36_check() as ok_ng
 	
 	dim x,y,z as integer
 	tbt36_get_mg(x,y,z)
-	current_probe_info.reading="X="+stri(x)+" Y="+stri(y)+" Z="+stri(z)
+	current_probe_info.reading="x="+convert_accelerometer_values(x)+"g" + " y="+convert_accelerometer_values(y)+"g" + " z="+convert_accelerometer_values(z)+"g"
 	
+	
+end function
+
+function convert_accelerometer_values(value as string) as string
+	
+	dim val_i as integer
+	dim i as byte
+	dim len_val as byte
+	dim negativ as boolean
+	
+	val_i = val(value)
+	if val_i < 0 then
+		val_i = val_i - 50	' For rounding
+	else
+		val_i = val_i + 50	' For rounding
+	end if
+	value = stri(val_i)
+	len_val = len(value)
+	
+	if val_i < 0 then 
+		negativ = true
+		value = mid(value, 2, len_val - 1)
+		len_val = len_val - 1
+	else 
+		negativ = false
+	end if
+	
+	if len_val > 2 then
+		convert_accelerometer_values = "." + mid(value, len_val - 2, 1)
+	else 
+		convert_accelerometer_values = ".0"
+	end if
+	
+	if len_val > 3 then
+		convert_accelerometer_values = mid(value, len_val - 3, 1) + convert_accelerometer_values
+	else 
+		convert_accelerometer_values = "0" + convert_accelerometer_values
+	end if
+
+	if len_val > 4 then
+		convert_accelerometer_values = mid(value, len_val - 4, 1) + convert_accelerometer_values
+	end if
+
+	if negativ then
+		if convert_accelerometer_values <> "0.0" then 
+			convert_accelerometer_values = "-" + convert_accelerometer_values
+		end if
+	end if
 	
 end function
 
