@@ -31,7 +31,7 @@ class MainMenu extends React.Component {
         </div>
       )
     }
-    else if (this.state.tempwarning === "0") {
+    else if (this.state.tempwarning === "0" && this.state.probetype === "BP#02 or Tibbit 30") {
       return (
         <div>
           <br></br><h1>{this.state.probetype}<br></br><br></br>
@@ -41,7 +41,7 @@ class MainMenu extends React.Component {
         </div>
       )
     }
-    else if (this.state.tempwarning === "1") {
+    else if (this.state.tempwarning === "1"  && this.state.probetype === "BP#02 or Tibbit 30") {
       return (
         <div>
           <br></br><h1>{this.state.probetype}<br></br><br></br>
