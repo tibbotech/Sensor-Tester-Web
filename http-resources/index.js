@@ -9,9 +9,9 @@ class MainMenu extends React.Component {
   updateJSON() {
     var sensorTypes = [
       ["Unknown",""], 
-      ["BP#01 or Tibbit 29", "Ambient Temperature Sensor"],
-      ["BP#02 or Tibbit 30","Ambient Temperature & Humidity Sensor"],
-      ["BP#03 or Tibbit 28","Ambient Light Sensor"],
+      ["CP#01 or Tibbit 29", "Ambient Temperature Sensor"],
+      ["CP#02 or Tibbit 30","Ambient Temperature & Humidity Sensor"],
+      ["CP#03 or Tibbit 28","Ambient Light Sensor"],
       ["Tibbit 36","3-Axis Accelerometer"],
       ["Tibbit 35","Barometric Pressure Sensor"]
     ]
@@ -31,7 +31,7 @@ class MainMenu extends React.Component {
         </div>
       )
     }
-    else if (this.state.tempwarning === "0" && this.state.probetype === "BP#02 or Tibbit 30") {
+    else if (this.state.tempwarning === "0" && this.state.probetype === "CP#02 or Tibbit 30") {
       return (
         <div>
           <br></br><h1>{this.state.probetype}<br></br><br></br>
@@ -41,7 +41,7 @@ class MainMenu extends React.Component {
         </div>
       )
     }
-    else if (this.state.tempwarning === "1"  && this.state.probetype === "BP#02 or Tibbit 30") {
+    else if (this.state.tempwarning === "1"  && this.state.probetype === "CP#02 or Tibbit 30") {
       return (
         <div>
           <br></br><h1>{this.state.probetype}<br></br><br></br>
