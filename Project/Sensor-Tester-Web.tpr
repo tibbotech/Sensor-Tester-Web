@@ -1,0 +1,198 @@
+[project]
+version = 1
+platform = TPP3W(G2)
+src_lib_ver = 2_01_03
+name = Sensor-Tester-Web
+output = Sensor-Tester-Web.tpc
+debug = off
+defines = /dLCD_TYPE=SOLOMON_SSD1963 /dOBJECT_LCD=LCD_ENABLED /dWLN_AVAILABLE=1 /dDHCP_DEBUG_PRINT=1 /dOBJECT_FD=FD_ENABLED /dOBJECT_KP=KP_ENABLED /dOBJECT_WLN=WLN_ENABLED
+transport = udp_winpcap
+
+[address1]
+platform = TPP2W
+transport = udp_winpcap
+address = 0.1.2.3.4.231
+
+[address2]
+platform = TPP3W
+transport = udp_winpcap
+address = 
+
+[address3]
+platform = TPP3W(G2)
+transport = udp_winpcap
+address = 0.1.2.3.4.32
+
+[address4]
+platform = TPP2W(G2)
+transport = udp_winpcap
+address = 0.1.2.3.4.56
+
+[file1]
+path = main.tbs
+type = basic
+format = 
+condition = 
+locked = no
+location = 
+
+[file2]
+path = global.tbh
+type = header
+format = 
+condition = 
+locked = no
+location = 
+
+[file3]
+path = super_i2c.tbh
+type = header
+format = 
+condition = 
+locked = no
+location = project
+
+[file4]
+path = super_i2c.tbs
+type = basic
+format = 
+condition = 
+locked = no
+location = project
+
+[file5]
+path = ssi.tbh
+type = header
+format = 
+condition = 
+locked = no
+location = project
+
+[file6]
+path = ssi.tbs
+type = basic
+format = 
+condition = 
+locked = no
+location = project
+
+[file7]
+path = tibbits.tbh
+type = header
+format = 65001
+condition = 
+locked = no
+location = project
+
+[file8]
+path = tibbits.tbs
+type = basic
+format = 65001
+condition = 
+locked = no
+location = project
+
+[file9]
+path = 11x19(HP).bin
+type = binary
+format = 
+condition = 
+locked = no
+location = project
+
+[file10]
+path = http-resources\favicon.ico
+type = binary
+format = 
+condition = 
+locked = no
+location = project
+
+[file11]
+path = http-resources\index.js
+type = text
+format = 
+condition = 
+locked = no
+location = project
+
+[file12]
+path = http-resources\style.css
+type = text
+format = 
+condition = 
+locked = no
+location = project
+
+[file13]
+path = http-resources\tibbo.svg
+type = binary
+format = 
+condition = 
+locked = no
+location = project
+
+[file14]
+path = http-resources\index.html
+type = html
+format = 65001
+condition = 
+locked = no
+location = project
+
+[file15]
+path = dhcp\trunk\dhcp.tbh
+type = header
+format = 
+condition = 
+locked = yes
+location = commonlib
+
+[file16]
+path = dhcp\trunk\dhcp.tbs
+type = basic
+format = 
+condition = 
+locked = no
+location = commonlib
+
+[file17]
+path = sock\trunk\sock.tbh
+type = header
+format = 
+condition = 
+locked = yes
+location = commonlib
+
+[file18]
+path = sock\trunk\sock.tbs
+type = basic
+format = 
+condition = 
+locked = yes
+location = commonlib
+
+[file19]
+path = http-resources\json.html
+type = html
+format = 65001
+condition = 
+locked = no
+location = project
+
+[file20]
+path = wln\trunk\wln.tbh
+type = header
+format = 
+condition = 
+locked = yes
+location = commonlib
+
+[file21]
+path = wln\trunk\wln.tbs
+type = basic
+format = 
+condition = 
+locked = yes
+location = commonlib
+
