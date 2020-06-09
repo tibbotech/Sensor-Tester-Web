@@ -23,8 +23,8 @@ end enum
 include "wln\trunk\wln.tbh"
 include "sock\trunk\sock.tbh"
 include "dhcp\trunk\dhcp.tbh"
-include "super_i2c.tbh"
-include "ssi.tbh"
+include "super_i2c\trunk\super_i2c.tbh"
+include "ssi\trunk\ssi.tbh"
 include "tibbits.tbh"
 
 declare sub init_LEDS()
