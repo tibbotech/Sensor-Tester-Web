@@ -133,7 +133,7 @@ function tbt28_init(use_ssi as no_yes)as ok_ng
 	if i2c_num_tbt28<=3 then
 		ssi.channel=i2c_num_tbt28
 		ssi.enabled=NO
-		ssi.baudrate=PL_SSI_BAUDRATES_400kHz
+		ssi.baudrate=PL_SSI_BAUD_400kHz
 		ssi.clkmap=CLK_PIN
 		ssi.dimap=DATA_PIN
 		ssi.domap=DATA_PIN
